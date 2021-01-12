@@ -1,8 +1,5 @@
 package com.example.business.api.dto;
 
-import com.example.business.api.model.Item;
-
-import javax.persistence.*;
 import java.util.Set;
 
 public class UserDTO {

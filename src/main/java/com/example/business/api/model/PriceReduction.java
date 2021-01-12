@@ -12,13 +12,13 @@ public class PriceReduction {
     @SequenceGenerator(name = "price_reductions_seq", sequenceName = "price_reductions_id_seq")
     private Long id;
 
-    @Column(name = "amount_deducted")
+    @Column(name = "amount_deducted", nullable = false)
     private Double amountDeducted;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP()")
     private LocalDateTime startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
