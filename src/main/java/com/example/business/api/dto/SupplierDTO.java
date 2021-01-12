@@ -1,25 +1,17 @@
-package com.example.business.api.model;
+package com.example.business.api.dto;
 
-import javax.persistence.*;
+import com.example.business.api.model.Item;
+
 import java.util.Set;
 
-@Entity
-@Table(name = "suppliers")
-public class Supplier {
-    @Id
-    @Column(name="id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "suppliers_seq")
-    @SequenceGenerator(name = "suppliers_seq", sequenceName = "suppliers_id_seq")
+public class SupplierDTO {
     private Long id;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "country")
     private String country;
 
-    @ManyToMany(mappedBy = "suppliers")
-    private Set<Item> items;
+    private Set<ItemDTO> items;
 
     public Long getId() {
         return id;
@@ -45,11 +37,11 @@ public class Supplier {
         this.country = country;
     }
 
-    public Set<Item> getItems() {
+    public Set<ItemDTO> getItems() {
         return items;
     }
 
-    public void setItems(Set<Item> items) {
+    public void setItems(Set<ItemDTO> items) {
         this.items = items;
     }
 }

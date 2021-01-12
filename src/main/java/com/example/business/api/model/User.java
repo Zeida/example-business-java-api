@@ -50,4 +50,12 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public Set<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(Set<Item> items) {
+        this.items = items;
+    }
 }
