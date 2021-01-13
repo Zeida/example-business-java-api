@@ -2,6 +2,7 @@ package com.example.business.api.dto;
 
 import com.example.business.api.model.ItemStateEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -19,15 +20,15 @@ public class ItemDTO implements Serializable {
 
     private ItemStateEnum state;
 
-    @JsonIgnore
+    @JsonManagedReference
     private Set<SupplierDTO> suppliers;
 
-    @JsonIgnore
+    @JsonManagedReference
     private List<PriceReductionDTO> priceReductions;
 
     private LocalDateTime creationDate;
 
-    @JsonIgnore
+    @JsonManagedReference
     private UserDTO creator;
 
     public Long getId() {

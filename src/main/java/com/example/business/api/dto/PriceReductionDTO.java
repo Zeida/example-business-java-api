@@ -1,5 +1,7 @@
 package com.example.business.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -12,6 +14,7 @@ public class PriceReductionDTO implements Serializable {
 
     private LocalDateTime endDate;
 
+    @JsonBackReference
     private ItemDTO item;
 
     public Long getId() {

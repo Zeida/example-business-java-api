@@ -1,5 +1,7 @@
 package com.example.business.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.io.Serializable;
 import java.util.Set;
 
@@ -10,6 +12,7 @@ public class SupplierDTO implements Serializable {
 
     private String country;
 
+    @JsonBackReference
     private Set<ItemDTO> items;
 
     public Long getId() {
