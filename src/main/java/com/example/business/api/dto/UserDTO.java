@@ -1,8 +1,9 @@
 package com.example.business.api.dto;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class UserDTO {
+public class UserDTO implements Serializable {
     private Long id;
 
     private String username;

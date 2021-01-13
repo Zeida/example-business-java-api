@@ -2,11 +2,12 @@ package com.example.business.api.dto;
 
 import com.example.business.api.model.ItemStateEnum;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-public class ItemDTO {
+public class ItemDTO implements Serializable {
     private Long id;
 
     private Long code;

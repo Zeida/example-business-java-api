@@ -30,7 +30,7 @@ public class Item {
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "item_supplier",
-            joinColumns = { @JoinColumn(name = "item:id") },
+            joinColumns = { @JoinColumn(name = "item_id") },
             inverseJoinColumns = { @JoinColumn(name = "supplier_id") }
     )
     private Set<Supplier> suppliers;

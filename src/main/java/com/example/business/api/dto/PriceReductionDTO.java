@@ -1,8 +1,9 @@
 package com.example.business.api.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class PriceReductionDTO {
+public class PriceReductionDTO implements Serializable {
     private Long id;
 
     private Double amountDeducted;
