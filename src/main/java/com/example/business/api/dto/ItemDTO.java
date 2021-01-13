@@ -1,6 +1,7 @@
 package com.example.business.api.dto;
 
 import com.example.business.api.model.ItemStateEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,12 +19,15 @@ public class ItemDTO implements Serializable {
 
     private ItemStateEnum state;
 
+    @JsonIgnore
     private Set<SupplierDTO> suppliers;
 
+    @JsonIgnore
     private List<PriceReductionDTO> priceReductions;
 
     private LocalDateTime creationDate;
 
+    @JsonIgnore
     private UserDTO creator;
 
     public Long getId() {
