@@ -12,7 +12,7 @@ public class Supplier {
     @SequenceGenerator(name = "suppliers_seq", sequenceName = "suppliers_id_seq")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "country")

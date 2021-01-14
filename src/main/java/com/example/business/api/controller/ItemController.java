@@ -1,16 +1,11 @@
 package com.example.business.api.controller;
 
 import com.example.business.api.dto.ItemDTO;
-import com.example.business.api.model.Item;
 import com.example.business.api.service.ItemService;
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @RestController
 public class ItemController {

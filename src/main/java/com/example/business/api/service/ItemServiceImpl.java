@@ -26,19 +26,25 @@ public class ItemServiceImpl implements ItemService{
 
     public void saveItem(ItemDTO dto) {
         Item item = convert2Entity(dto);
-        itemRepository.save(item);
+        if(item != null)
+            itemRepository.save(item);
     }
 
     public ItemDTO getItemByCode(Long code) {
         Item item = itemRepository.findByCode(code);
-        return convert2DTO(item);
+        if(item != null)
+            return convert2DTO(item);
+        return null;
     }
 
     public void updateItemWithCode(ItemDTO dto, Long code) throws ChangeSetPersister.NotFoundException {
         Item item = convert2Entity(dto);
-        if(itemRepository.findByCode(code) == null && item.getCode().equals(code)) {
+        Item currentItem = itemRepository.findByCode(code);
+        if(currentItem == null || item == null || !item.getCode().equals(code)) {
             throw new ChangeSetPersister.NotFoundException();
         }
+
+        item.setId(currentItem.getId());
         itemRepository.save(item);
     }
 

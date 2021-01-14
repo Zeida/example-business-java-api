@@ -4,5 +4,6 @@ import com.example.business.api.model.Supplier;
 import org.springframework.data.repository.CrudRepository;
 
 public interface SupplierRepository extends CrudRepository<Supplier, Long> {
-
+    Supplier findByName(String name);
+    Iterable<Supplier> findByCountry(String country);
 }
