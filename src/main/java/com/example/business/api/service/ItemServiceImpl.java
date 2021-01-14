@@ -24,6 +24,11 @@ public class ItemServiceImpl implements ItemService{
         return convertIterable2DTO(items);
     }
 
+    public ItemDTO addItem(ItemDTO dto) {
+        Item item = convert2Entity(dto);
+        return convert2DTO(itemRepository.save(item));
+    }
+
     public ItemDTO convert2DTO(Item entity) {
         return modelMapper.map(entity, ItemDTO.class);
     }

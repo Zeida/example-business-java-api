@@ -5,9 +5,8 @@ import com.example.business.api.model.Item;
 import com.example.business.api.service.ItemService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,9 +16,15 @@ public class ItemController {
     @Autowired
     private ItemService itemService;
 
-    @GetMapping(name = "items", path = "/items")
+    @GetMapping(path = "/items")
     @ResponseBody
     public Iterable<ItemDTO> allItems() {
         return itemService.getAllItems();
+    }
+
+    @PostMapping(path = "/items", consumes = "application/json")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public void addItem(@RequestBody ItemDTO item) {
+        itemService.addItem(item);
     }
 }

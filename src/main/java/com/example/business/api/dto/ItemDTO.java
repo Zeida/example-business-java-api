@@ -20,15 +20,12 @@ public class ItemDTO implements Serializable {
 
     private ItemStateEnum state;
 
-    @JsonManagedReference
     private Set<SupplierDTO> suppliers;
 
-    @JsonManagedReference
     private List<PriceReductionDTO> priceReductions;
 
     private LocalDateTime creationDate;
 
-    @JsonManagedReference
     private UserDTO creator;
 
     public Long getId() {
