@@ -5,5 +5,5 @@ import com.example.business.api.model.Item;
 
 public interface ItemService extends BaseService<Item, ItemDTO>{
     Iterable<ItemDTO> getAllItems();
-    ItemDTO addItem(ItemDTO dto);
+    ItemDTO saveItem(ItemDTO dto);
 }

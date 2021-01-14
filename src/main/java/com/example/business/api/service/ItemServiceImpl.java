@@ -7,7 +7,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -24,7 +23,7 @@ public class ItemServiceImpl implements ItemService{
         return convertIterable2DTO(items);
     }
 
-    public ItemDTO addItem(ItemDTO dto) {
+    public ItemDTO saveItem(ItemDTO dto) {
         Item item = convert2Entity(dto);
         return convert2DTO(itemRepository.save(item));
     }
