@@ -5,6 +5,7 @@ import com.example.business.api.model.Item;
 import com.example.business.api.service.ItemService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +24,20 @@ public class ItemController {
     }
 
     @PostMapping(path = "/items", consumes = "application/json")
-    @ResponseStatus(code = HttpStatus.CREATED)
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void addItem(@RequestBody ItemDTO item) {
-        itemService.addItem(item);
+        itemService.saveItem(item);
+    }
+
+    @GetMapping(path = "/items/{code}")
+    @ResponseBody
+    public ItemDTO getItemByCode(@PathVariable Long code) {
+        return itemService.getItemByCode(code);
+    }
+
+    @PutMapping(path = "/items/{code}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void updateItemByCode(@PathVariable Long code, @RequestBody ItemDTO item) throws ChangeSetPersister.NotFoundException {
+        itemService.updateItemWithCode(item, code);
     }
 }

@@ -5,6 +5,7 @@ import com.example.business.api.model.Item;
 import com.example.business.api.repository.ItemRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -23,28 +24,49 @@ public class ItemServiceImpl implements ItemService{
         return convertIterable2DTO(items);
     }
 
-    public ItemDTO saveItem(ItemDTO dto) {
+    public void saveItem(ItemDTO dto) {
         Item item = convert2Entity(dto);
-        return convert2DTO(itemRepository.save(item));
+        itemRepository.save(item);
+    }
+
+    public ItemDTO getItemByCode(Long code) {
+        Item item = itemRepository.findByCode(code);
+        return convert2DTO(item);
+    }
+
+    public void updateItemWithCode(ItemDTO dto, Long code) throws ChangeSetPersister.NotFoundException {
+        Item item = convert2Entity(dto);
+        if(itemRepository.findByCode(code) == null && item.getCode().equals(code)) {
+            throw new ChangeSetPersister.NotFoundException();
+        }
+        itemRepository.save(item);
     }
 
     public ItemDTO convert2DTO(Item entity) {
-        return modelMapper.map(entity, ItemDTO.class);
+        if(entity != null)
+            return modelMapper.map(entity, ItemDTO.class);
+        return null;
     }
 
     public Item convert2Entity(ItemDTO dto) {
-        return modelMapper.map(dto, Item.class);
+        if(dto != null)
+            return modelMapper.map(dto, Item.class);
+        return null;
     }
 
     public Iterable<ItemDTO> convertIterable2DTO(Iterable<Item> iterableEntities) {
-        return StreamSupport.stream(iterableEntities.spliterator(), false)
-                .map(item -> modelMapper.map(item, ItemDTO.class))
-                .collect(Collectors.toSet());
+        if(iterableEntities != null)
+            return StreamSupport.stream(iterableEntities.spliterator(), false)
+                    .map(item -> modelMapper.map(item, ItemDTO.class))
+                    .collect(Collectors.toSet());
+        return null;
     }
 
     public Iterable<Item> convertIterable2Entity(Iterable<ItemDTO> iterableDTOs) {
-        return StreamSupport.stream(iterableDTOs.spliterator(), false)
-                .map(itemDTO -> modelMapper.map(itemDTO, Item.class))
-                .collect(Collectors.toSet());
+        if(iterableDTOs != null)
+            return StreamSupport.stream(iterableDTOs.spliterator(), false)
+                    .map(itemDTO -> modelMapper.map(itemDTO, Item.class))
+                    .collect(Collectors.toSet());
+        return null;
     }
 }
