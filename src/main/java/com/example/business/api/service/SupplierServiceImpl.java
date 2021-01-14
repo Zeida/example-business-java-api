@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -31,20 +32,18 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     public SupplierDTO getSupplierByName(String name) {
-        Supplier supplier = supplierRepository.findByName(name);
-        if(supplier != null)
-            return convert2DTO(supplier);
-        return null;
+        Optional<Supplier> supplier = supplierRepository.findByName(name);
+        return supplier.map(this::convert2DTO).orElse(null);
     }
 
     public void updateSupplierWithName(SupplierDTO dto, String name) throws ChangeSetPersister.NotFoundException {
         Supplier supplier = convert2Entity(dto);
-        Supplier currentSupplier = supplierRepository.findByName(name);
-        if(currentSupplier == null || supplier == null || !supplier.getName().equals(name)) {
+        Optional<Supplier> currentSupplier = supplierRepository.findByName(name);
+        if(!currentSupplier.isPresent() || supplier == null || !supplier.getName().equals(name)) {
             throw new ChangeSetPersister.NotFoundException();
         }
 
-        supplier.setId(currentSupplier.getId());
+        supplier.setId(currentSupplier.get().getId());
         supplierRepository.save(supplier);
     }
 

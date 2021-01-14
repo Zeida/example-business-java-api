@@ -20,7 +20,7 @@ public class ItemController {
 
     @PostMapping(path = "/items", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void addItem(@RequestBody ItemDTO item) {
+    public void addItem(@RequestBody ItemDTO item) throws ChangeSetPersister.NotFoundException {
         itemService.saveItem(item);
     }
 

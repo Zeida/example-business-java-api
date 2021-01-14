@@ -6,7 +6,7 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 
 public interface ItemService extends BaseService<Item, ItemDTO>{
     Iterable<ItemDTO> getAllItems();
-    void saveItem(ItemDTO dto);
+    void saveItem(ItemDTO dto) throws ChangeSetPersister.NotFoundException;
     ItemDTO getItemByCode(Long code);
     void updateItemWithCode(ItemDTO dto, Long code) throws ChangeSetPersister.NotFoundException;
 }
