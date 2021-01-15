@@ -7,10 +7,13 @@ import java.time.LocalDateTime;
 @Table(name = "price_reductions")
 public class PriceReduction {
     @Id
-    @Column(name="id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "price_reductions_seq")
     @SequenceGenerator(name = "price_reductions_seq", sequenceName = "price_reductions_id_seq")
     private Long id;
+
+    @Column(name = "code", nullable = false, unique = true)
+    private Long code;
 
     @Column(name = "amount_deducted", nullable = false)
     private Double amountDeducted;
@@ -31,6 +34,14 @@ public class PriceReduction {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getCode() {
+        return code;
+    }
+
+    public void setCode(Long code) {
+        this.code = code;
     }
 
     public Double getAmountDeducted() {
