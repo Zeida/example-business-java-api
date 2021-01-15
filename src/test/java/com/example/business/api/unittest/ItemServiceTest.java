@@ -3,6 +3,7 @@ package com.example.business.api.unittest;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.Item;
+import com.example.business.api.model.ItemStateEnum;
 import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
@@ -19,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -111,5 +113,22 @@ public class ItemServiceTest {
         Iterable<ItemDTO> allItems = itemService.getAllItems();
 
         allItems.forEach(givenItem -> Assert.assertTrue(itemsDTO.contains(givenItem)));
+    }
+
+    @Test
+    public void getItemByExistingCode() {
+        Long code = 1L;
+        Item itemFromDB = new Item();
+        itemFromDB.setId(1L);
+        itemFromDB.setCode(code);
+
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setId(itemFromDB.getId());
+        itemDTO.setCode(itemFromDB.getCode());
+
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(itemFromDB));
+        Mockito.doReturn(itemDTO).when(itemService).convert2DTO(itemFromDB);
+
+        Assert.assertEquals(code, itemService.getItemByCode(code).getCode());
     }
 }
