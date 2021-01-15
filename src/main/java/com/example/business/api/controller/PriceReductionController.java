@@ -38,7 +38,7 @@ public class PriceReductionController {
 
     @PutMapping(path = "/price-reductions/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) {
-
+    public void updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) throws ChangeSetPersister.NotFoundException {
+        priceReductionService.updatePriceReductionWithCode(priceReduction, code);
     }
 }
