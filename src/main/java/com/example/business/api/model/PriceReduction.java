@@ -28,6 +28,33 @@ public class PriceReduction {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
+    public PriceReduction() {
+    }
+
+    public PriceReduction(Long code, Double amountDeducted, LocalDateTime endDate, Item item) {
+        this.code = code;
+        this.amountDeducted = amountDeducted;
+        this.endDate = endDate;
+        this.item = item;
+    }
+
+    public PriceReduction(Long code, Double amountDeducted, LocalDateTime startDate, LocalDateTime endDate, Item item) {
+        this.code = code;
+        this.amountDeducted = amountDeducted;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.item = item;
+    }
+
+    public PriceReduction(Long id, Long code, Double amountDeducted, LocalDateTime startDate, LocalDateTime endDate, Item item) {
+        this.id = id;
+        this.code = code;
+        this.amountDeducted = amountDeducted;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.item = item;
+    }
+
     public Long getId() {
         return id;
     }

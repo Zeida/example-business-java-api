@@ -21,6 +21,22 @@ public class Supplier {
     @ManyToMany(mappedBy = "suppliers")
     private Set<Item> items;
 
+    public Supplier() {
+    }
+
+    public Supplier(String name, String country, Set<Item> items) {
+        this.name = name;
+        this.country = country;
+        this.items = items;
+    }
+
+    public Supplier(Long id, String name, String country, Set<Item> items) {
+        this.id = id;
+        this.name = name;
+        this.country = country;
+        this.items = items;
+    }
+
     public Long getId() {
         return id;
     }

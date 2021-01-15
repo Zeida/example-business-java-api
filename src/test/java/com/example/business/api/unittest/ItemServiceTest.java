@@ -3,7 +3,6 @@ package com.example.business.api.unittest;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.Item;
-import com.example.business.api.model.ItemStateEnum;
 import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
@@ -19,7 +18,6 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,35 +40,23 @@ public class ItemServiceTest {
     private PriceReductionRepository priceReductionRepository;
 
     @Test
-    public void findAllItems() {
+    public void findAllItemsWithOneItem() {
         Set<Item> items = new HashSet<>();
         Set<ItemDTO> itemsDTO = new HashSet<>();
 
         User user = new User();
         user.setId(1L);
-        user.setUsername("username");
-        user.setPassword("password");
-        user.setItems(items);
 
         Item item = new Item();
         item.setId(1L);
-        item.setCode(1234567890L);
-        item.setDescription("Description");
-        item.setPrice(12.32);
-        item.setState(ItemStateEnum.ACTIVE);
-        item.setCreationDate(LocalDateTime.now());
-        item.setCreator(user);
 
         items.add(item);
 
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setPassword(user.getPassword());
-        userDTO.setItems(itemsDTO);
 
         ItemDTO itemDTO = new ItemDTO();
-        itemDTO.setId(1L);
+        itemDTO.setId(item.getId());
 
         itemsDTO.add(itemDTO);
 
@@ -79,8 +65,51 @@ public class ItemServiceTest {
 
         Iterable<ItemDTO> allItems = itemService.getAllItems();
 
-        Long id = 1L;
+        Assert.assertEquals(new Long(1L), allItems.iterator().next().getId());
+    }
 
-        Assert.assertEquals(id, allItems.iterator().next().getId());
+    @Test
+    public void findAllItemsWith3Items() {
+        Set<Item> items = new HashSet<>();
+        Set<ItemDTO> itemsDTO = new HashSet<>();
+
+        User user = new User();
+        user.setId(1L);
+
+        Item item1 = new Item();
+        item1.setId(1L);
+
+        Item item2 = new Item();
+        item2.setId(2L);
+
+        Item item3 = new Item();
+        item3.setId(3L);
+
+        items.add(item1);
+        items.add(item2);
+        items.add(item3);
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+
+        ItemDTO itemDTO1 = new ItemDTO();
+        itemDTO1.setId(item1.getId());
+
+        ItemDTO itemDTO2 = new ItemDTO();
+        itemDTO2.setId(item2.getId());
+
+        ItemDTO itemDTO3 = new ItemDTO();
+        itemDTO3.setId(item3.getId());
+
+        itemsDTO.add(itemDTO1);
+        itemsDTO.add(itemDTO2);
+        itemsDTO.add(itemDTO3);
+
+        Mockito.when(itemRepository.findAll()).thenReturn(items);
+        Mockito.doReturn(itemsDTO).when(itemService).convertIterable2DTO(items);
+
+        Iterable<ItemDTO> allItems = itemService.getAllItems();
+
+        allItems.forEach(givenItem -> Assert.assertTrue(itemsDTO.contains(givenItem)));
     }
 }

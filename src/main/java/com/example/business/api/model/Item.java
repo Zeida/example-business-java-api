@@ -45,6 +45,39 @@ public class Item {
     @JoinColumn(name = "user_id", nullable = false)
     private User creator;
 
+    public Item() {
+    }
+
+    public Item(Long code, Double price, ItemStateEnum state, User creator) {
+        this.code = code;
+        this.price = price;
+        this.state = state;
+        this.creator = creator;
+    }
+
+    public Item(Long code, String description, Double price, ItemStateEnum state, Set<Supplier> suppliers, List<PriceReduction> priceReductions, LocalDateTime creationDate, User creator) {
+        this.code = code;
+        this.description = description;
+        this.price = price;
+        this.state = state;
+        this.suppliers = suppliers;
+        this.priceReductions = priceReductions;
+        this.creationDate = creationDate;
+        this.creator = creator;
+    }
+
+    public Item(Long id, Long code, String description, Double price, ItemStateEnum state, Set<Supplier> suppliers, List<PriceReduction> priceReductions, LocalDateTime creationDate, User creator) {
+        this.id = id;
+        this.code = code;
+        this.description = description;
+        this.price = price;
+        this.state = state;
+        this.suppliers = suppliers;
+        this.priceReductions = priceReductions;
+        this.creationDate = creationDate;
+        this.creator = creator;
+    }
+
     public Long getId() {
         return id;
     }
