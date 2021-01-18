@@ -18,6 +18,10 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", columnDefinition = "varchar(25) default 'USER'")
+    private UserRoleEnum role;
+
     @OneToMany(
             fetch = FetchType.LAZY,
             mappedBy = "creator",
@@ -59,6 +63,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserRoleEnum getRole() {
+        return role;
+    }
+
+    public void setRole(UserRoleEnum role) {
+        this.role = role;
     }
 
     public Set<Item> getItems() {

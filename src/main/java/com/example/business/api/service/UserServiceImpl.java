@@ -30,22 +30,22 @@ public class UserServiceImpl implements UserService {
 
         if(user != null) {
             if(BCrypt.checkpw(password, user.getPassword())) {
-                user.setToken(getJWTTokenByUsername(username));
+                user.setToken(getJWTTokenByUser(user));
                 return user;
             }
         }
         return null;
     }
 
-    private String getJWTTokenByUsername(String username) {
+    private String getJWTTokenByUser(UserDTO user) {
         String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-                .commaSeparatedStringToAuthorityList("ROLE_USER");
+                .commaSeparatedStringToAuthorityList(user.getRole().name());
 
         String token = Jwts
                 .builder()
                 .setId("id")
-                .setSubject(username)
+                .setSubject(user.getUsername())
                 .claim("authorities",
                         grantedAuthorities.stream()
                                 .map(GrantedAuthority::getAuthority)

@@ -18,7 +18,7 @@ public class PriceReduction {
     @Column(name = "amount_deducted", nullable = false)
     private Double amountDeducted;
 
-    @Column(name = "start_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP()")
+    @Column(name = "start_date", columnDefinition = "timestamp default current_timestamp()")
     private LocalDateTime startDate;
 
     @Column(name = "end_date", nullable = false)

@@ -24,7 +24,7 @@ public class Item {
     private Double price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "state")
+    @Column(name = "state", columnDefinition = "varchar(25) default 'ACTIVE'")
     private ItemStateEnum state;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -38,7 +38,7 @@ public class Item {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = CascadeType.ALL)
     private List<PriceReduction> priceReductions;
 
-    @Column(name = "creation_date")
+    @Column(name = "creation_date", columnDefinition = "timestamp default current_timestamp()")
     private LocalDateTime creationDate;
 
     @ManyToOne

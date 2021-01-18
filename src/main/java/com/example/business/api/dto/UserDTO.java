@@ -1,5 +1,6 @@
 package com.example.business.api.dto;
 
+import com.example.business.api.model.UserRoleEnum;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.io.Serializable;
@@ -11,6 +12,8 @@ public class UserDTO implements Serializable {
     private String username;
 
     private String password;
+
+    private UserRoleEnum role;
 
     @JsonBackReference
     private Set<ItemDTO> items;
@@ -39,6 +42,14 @@ public class UserDTO implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserRoleEnum getRole() {
+        return role;
+    }
+
+    public void setRole(UserRoleEnum role) {
+        this.role = role;
     }
 
     public Set<ItemDTO> getItems() {
