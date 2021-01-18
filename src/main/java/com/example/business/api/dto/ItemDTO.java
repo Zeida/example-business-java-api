@@ -1,8 +1,6 @@
 package com.example.business.api.dto;
 
 import com.example.business.api.model.ItemStateEnum;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

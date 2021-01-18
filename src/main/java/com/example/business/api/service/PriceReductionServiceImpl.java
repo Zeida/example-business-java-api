@@ -1,10 +1,7 @@
 package com.example.business.api.service;
 
-import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.PriceReductionDTO;
-import com.example.business.api.model.Item;
 import com.example.business.api.model.PriceReduction;
-import com.example.business.api.model.Supplier;
 import com.example.business.api.repository.PriceReductionRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

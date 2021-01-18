@@ -3,7 +3,6 @@ package com.example.business.api.unittest;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.Item;
-import com.example.business.api.model.ItemStateEnum;
 import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
@@ -130,5 +129,21 @@ public class ItemServiceTest {
         Mockito.doReturn(itemDTO).when(itemService).convert2DTO(itemFromDB);
 
         Assert.assertEquals(code, itemService.getItemByCode(code).getCode());
+    }
+
+    @Test
+    public void getItemWithNoExistingCode() {
+        Long code = 2L;
+        Item itemFromDB = new Item();
+        itemFromDB.setId(1L);
+        itemFromDB.setCode(1L);
+
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setId(itemFromDB.getId());
+        itemDTO.setCode(itemFromDB.getCode());
+
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.empty());
+
+        Assert.assertNull(itemService.getItemByCode(code));
     }
 }

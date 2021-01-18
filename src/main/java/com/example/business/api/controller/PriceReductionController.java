@@ -1,17 +1,12 @@
 package com.example.business.api.controller;
 
-import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.PriceReductionDTO;
-import com.example.business.api.dto.SupplierDTO;
-import com.example.business.api.model.Item;
-import com.example.business.api.model.PriceReduction;
 import com.example.business.api.service.PriceReductionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class PriceReductionController {
@@ -32,8 +27,14 @@ public class PriceReductionController {
 
     @GetMapping(path = "/price-reductions/{code}")
     @ResponseBody
-    public PriceReductionDTO getPriceReductionFromCode(@PathVariable Long code) {
-        return priceReductionService.getPriceReductionFromCode(code);
+    public PriceReductionDTO getPriceReductionFromCode(@PathVariable String code) {
+        try {
+            Long parsedCode = Long.parseLong(code);
+            return priceReductionService.getPriceReductionFromCode(parsedCode);
+        } catch(NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The price reduction code provided must be numerical-only", e);
+        }
     }
 
     @PutMapping(path = "/price-reductions/{code}")

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ItemController {
@@ -26,8 +27,14 @@ public class ItemController {
 
     @GetMapping(path = "/items/{code}")
     @ResponseBody
-    public ItemDTO getItemByCode(@PathVariable Long code) {
-        return itemService.getItemByCode(code);
+    public ItemDTO getItemByCode(@PathVariable String code) {
+        try {
+            Long parsedCode = Long.parseLong(code);
+            return itemService.getItemByCode(parsedCode);
+        } catch(NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The item code provided must be numerical-only", e);
+        }
     }
 
     @PutMapping(path = "/items/{code}")
