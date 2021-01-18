@@ -15,6 +15,8 @@ public class UserDTO implements Serializable {
     @JsonBackReference
     private Set<ItemDTO> items;
 
+    private String token;
+
     public Long getId() {
         return id;
     }
@@ -45,5 +47,13 @@ public class UserDTO implements Serializable {
 
     public void setItems(Set<ItemDTO> items) {
         this.items = items;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
