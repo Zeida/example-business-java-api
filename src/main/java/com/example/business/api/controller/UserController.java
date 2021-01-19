@@ -28,14 +28,14 @@ public class UserController {
     @PostMapping(path = "/users")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addUser(@RequestBody UserDTO user) throws ChangeSetPersister.NotFoundException {
+    public void addUser(@RequestBody UserDTO user) {
         userService.saveUser(user);
     }
 
     @DeleteMapping(path = "/users")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void removeUser(@RequestBody UserDTO user) throws ChangeSetPersister.NotFoundException {
+    public void removeUser(@RequestBody UserDTO user) {
         userService.removeUser(user);
     }
 }

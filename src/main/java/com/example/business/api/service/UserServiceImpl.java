@@ -9,14 +9,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,7 +38,7 @@ public class UserServiceImpl implements UserService {
                 return user;
             }
         }
-        return null;
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The user and/or password is incorrect");
     }
 
     public Iterable<UserDTO> findAllUsers() {
@@ -48,12 +46,16 @@ public class UserServiceImpl implements UserService {
         return convertIterable2DTO(users);
     }
 
-    public void saveUser(UserDTO dto) throws ChangeSetPersister.NotFoundException {
+    public void saveUser(UserDTO dto) {
+        if(userRepository.findByUsername(dto.getUsername()).isPresent())
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("Invalid username, '%s' already exists", dto.getUsername()));
+
         User user = convert2Entity(dto);
         if(user != null) {
             Set<Item> allItems = processItems(user);
             if(allItems == null)
-                throw new ChangeSetPersister.NotFoundException();
+                allItems = new HashSet<>();
 
             user.setItems(allItems);
             user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
@@ -62,14 +64,13 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void removeUser(UserDTO dto) throws ChangeSetPersister.NotFoundException {
+    public void removeUser(UserDTO dto) {
         User user = convert2Entity(dto);
-        if(userRepository.findByUsername(user.getUsername()).isPresent()) {
-            userRepository.delete(user);
-            return;
+        if(!userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");
         }
 
-        throw new ChangeSetPersister.NotFoundException();
+        userRepository.delete(user);
     }
 
     private String getJWTTokenByUser(UserDTO user) {
@@ -116,11 +117,15 @@ public class UserServiceImpl implements UserService {
     }
 
     private Set<Item> processItems(User user) {
-        Set<Item> existingItems = user.getItems().stream()
-                .filter(item -> Objects.nonNull(item.getId()))
-                .collect(Collectors.toSet());
+        Set<Item> existingItems = new HashSet<>();
+        if(user.getItems() != null)
+            existingItems = user.getItems().stream()
+                    .filter(item -> Objects.nonNull(item.getId()))
+                    .collect(Collectors.toSet());
 
-        Set<Item> allItems = user.getItems().stream()
+        Set<Item> allItems = new HashSet<>();
+        if(user.getItems() != null)
+            allItems = user.getItems().stream()
                 .filter(item -> Objects.isNull(item.getId()))
                 .collect(Collectors.toSet());
 

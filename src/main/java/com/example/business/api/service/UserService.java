@@ -7,6 +7,6 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 public interface UserService extends BaseService<User, UserDTO> {
     UserDTO login(String username, String password);
     Iterable<UserDTO> findAllUsers();
-    void saveUser(UserDTO dto) throws ChangeSetPersister.NotFoundException;
-    void removeUser(UserDTO dto) throws ChangeSetPersister.NotFoundException;
+    void saveUser(UserDTO dto);
+    void removeUser(UserDTO dto);
 }
