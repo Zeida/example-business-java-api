@@ -5,6 +5,7 @@ import com.example.business.api.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,18 +16,21 @@ public class ItemController {
 
     @GetMapping(path = "/items")
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public Iterable<ItemDTO> allItems() {
         return itemService.getAllItems();
     }
 
     @PostMapping(path = "/items", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public void addItem(@RequestBody ItemDTO item) throws ChangeSetPersister.NotFoundException {
         itemService.saveItem(item);
     }
 
     @GetMapping(path = "/items/{code}")
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public ItemDTO getItemByCode(@PathVariable String code) {
         try {
             Long parsedCode = Long.parseLong(code);
@@ -39,6 +43,7 @@ public class ItemController {
 
     @PutMapping(path = "/items/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public void updateItemByCode(@PathVariable Long code, @RequestBody ItemDTO item) throws ChangeSetPersister.NotFoundException {
         itemService.updateItemWithCode(item, code);
     }

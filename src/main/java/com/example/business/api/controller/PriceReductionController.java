@@ -5,6 +5,7 @@ import com.example.business.api.service.PriceReductionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,18 +16,21 @@ public class PriceReductionController {
 
     @GetMapping(path = "/price-reductions")
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public Iterable<PriceReductionDTO> allPriceReductions() {
         return priceReductionService.getAllPriceReductions();
     }
 
     @PostMapping(path = "/price-reductions", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
     public void addPriceReduction(@RequestBody PriceReductionDTO priceReduction) {
         priceReductionService.savePriceReduction(priceReduction);
     }
 
     @GetMapping(path = "/price-reductions/{code}")
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public PriceReductionDTO getPriceReductionFromCode(@PathVariable String code) {
         try {
             Long parsedCode = Long.parseLong(code);
@@ -39,6 +43,7 @@ public class PriceReductionController {
 
     @PutMapping(path = "/price-reductions/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     public void updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) throws ChangeSetPersister.NotFoundException {
         priceReductionService.updatePriceReductionWithCode(priceReduction, code);
     }
