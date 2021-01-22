@@ -1,5 +1,6 @@
 package com.example.business.api.service;
 
+import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.model.Item;
 import com.example.business.api.model.Supplier;
@@ -29,6 +30,9 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private ItemService itemService;
 
     public Iterable<SupplierDTO> getAllSuppliers() {
         Iterable<Supplier> suppliers = supplierRepository.findAll();
@@ -69,6 +73,7 @@ public class SupplierServiceImpl implements SupplierService {
                 String.format("The supplier '%s' doest not exist", name));
     }
 
+    @Transactional
     public void updateSupplierWithName(SupplierDTO dto, String name) {
         if (!name.equals(dto.getName()))
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -81,13 +86,23 @@ public class SupplierServiceImpl implements SupplierService {
                     String.format("The supplier '%s' doest not exist", name));
         }
 
-        Supplier supplier = convert2Entity(dto);
-        if (supplier != null) {
-            Set<Item> allItems = processItems(supplier);
+        Supplier supplier = currentSupplier.get();
 
-            //supplier.setItems(allItems);
+        supplier.setCountry(dto.getCountry());
 
-            supplierRepository.save(supplier);
+        Iterable<Item> items = itemService.convertIterable2Entity(dto.getItems());
+
+        for(Item item : items) {
+            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
+
+            if(itemDB.isPresent()) {
+                itemDB.get().addSupplier(supplier);
+                supplier.addItem(itemDB.get());
+            } else {
+                itemRepository.save(item);
+                item.addSupplier(supplier);
+                supplier.addItem(item);
+            }
         }
     }
 
@@ -117,42 +132,5 @@ public class SupplierServiceImpl implements SupplierService {
                     .map(supplierDTO -> modelMapper.map(supplierDTO, Supplier.class))
                     .collect(Collectors.toSet());
         return null;
-    }
-
-    private Set<Item> processItems(Supplier supplier) {
-        Set<Item> existingItems = new HashSet<>();
-        if (supplier.getItems() != null)
-            existingItems = supplier.getItems().stream()
-                    .filter(item -> Objects.nonNull(item.getId()))
-                    .collect(Collectors.toSet());
-
-        Set<Item> allItems = new HashSet<>();
-        if (supplier.getItems() != null)
-            allItems = supplier.getItems().stream()
-                    .filter(item -> Objects.isNull(item.getId()))
-                    .collect(Collectors.toSet());
-
-        for (Item item : allItems) {
-            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
-            if (!itemDB.isPresent()) {
-                Item saved = itemRepository.save(item);
-                Set <Supplier> s = new HashSet<>();
-                s.add(supplier);
-                item.setSuppliers(s);
-            }
-        }
-
-        for (Item item : existingItems) {
-            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
-            if (itemDB.isPresent()) {
-                Item itemToUpdate = itemDB.get();
-
-                if (itemToUpdate.getSuppliers().add(supplier)) {
-                    allItems.add(itemToUpdate);
-                }
-            }
-        }
-
-        return allItems;
     }
 }
