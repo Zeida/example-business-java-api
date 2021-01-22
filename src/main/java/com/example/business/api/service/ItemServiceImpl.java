@@ -9,13 +9,11 @@ import com.example.business.api.repository.PriceReductionRepository;
 import com.example.business.api.repository.SupplierRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -38,37 +36,54 @@ public class ItemServiceImpl implements ItemService{
         return convertIterable2DTO(items);
     }
 
-    public void saveItem(ItemDTO dto) throws ChangeSetPersister.NotFoundException {
+    public void saveItem(ItemDTO dto) {
+        if(dto.getCreator() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have an user associated");
+
+        if(itemRepository.findByCode(dto.getCode()).isPresent())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid item, '%s' already exists", dto.getCode()));
+
         Item item = convert2Entity(dto);
-        if(item != null) {
-            Set<Supplier> allSuppliers = processSuppliers(item);
-            if(allSuppliers == null)
-                throw new ChangeSetPersister.NotFoundException();
 
-            List<PriceReduction> allPriceReductions = processPriceReductions(item);
-            if(allPriceReductions == null)
-                throw new ChangeSetPersister.NotFoundException();
+        Set<Supplier> suppliers = new HashSet<>();
 
-            item.setSuppliers(allSuppliers);
-            item.setPriceReductions(allPriceReductions);
-
-            itemRepository.save(item);
+        if(item.getSuppliers() != null) {
+            for(Supplier supplier : item.getSuppliers()) {
+                Optional<Supplier> dbSupplier = supplierRepository.findByName(supplier.getName());
+                if(dbSupplier.isPresent()) {
+                    suppliers.add(supplier);
+                } else {
+                    suppliers.add(supplierRepository.save(supplier));
+                }
+            }
         }
+
+        item.setSuppliers(suppliers);
+
+        itemRepository.save(item);
     }
 
     public ItemDTO getItemByCode(Long code) {
         Optional<Item> item = itemRepository.findByCode(code);
-        return item.map(this::convert2DTO).orElse(null);
-    }
-
-    public void updateItemWithCode(ItemDTO dto, Long code) throws ChangeSetPersister.NotFoundException {
-        Item item = convert2Entity(dto);
-        Optional<Item> currentItem = itemRepository.findByCode(code);
-        if(!currentItem.isPresent() || item == null || !item.getCode().equals(code)) {
-            throw new ChangeSetPersister.NotFoundException();
+        if(item.isPresent()) {
+            return convert2DTO(item.get());
         }
 
-        item.setId(currentItem.get().getId());
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exist", code));
+    }
+
+    public void updateItemWithCode(ItemDTO dto, Long code) {
+        if(!dto.getCode().equals(code)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("Expected to update the item '%s'," +
+                            " item '%s' given.", code, dto.getCode()));
+        }
+
+        if(!itemRepository.findByCode(code).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exists", code));
+        }
+
+        Item item = convert2Entity(dto);
         itemRepository.save(item);
     }
 
@@ -101,6 +116,9 @@ public class ItemServiceImpl implements ItemService{
     }
 
     private Set<Supplier> processSuppliers(Item item) {
+        if(item.getSuppliers() == null)
+            return new HashSet<>();
+
         Set<Supplier> existingSuppliers = item.getSuppliers().stream()
                 .filter(supplier -> Objects.nonNull(supplier.getId()))
                 .collect(Collectors.toSet());
@@ -109,17 +127,26 @@ public class ItemServiceImpl implements ItemService{
                 .filter(supplier -> Objects.isNull(supplier.getId()))
                 .collect(Collectors.toSet());
 
-        for(Supplier supplier : existingSuppliers) {
+        for(Supplier supplier : allSuppliers) {
             Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
-            if(!supplierDB.isPresent())
-                return null;
-            allSuppliers.add(supplierDB.get());
+            if(!supplierDB.isPresent()) {
+                Supplier saved  = supplierRepository.save(supplier);
+                supplier.setId(saved.getId());
+            }
+        }
+
+        for(Supplier supplier : existingSuppliers) {
+            if(supplierRepository.findByName(supplier.getName()).isPresent())
+                allSuppliers.add(supplier);
         }
 
         return allSuppliers;
     }
 
     private List<PriceReduction> processPriceReductions(Item item) {
+        if(item.getPriceReductions() == null)
+            return new ArrayList<>();
+
         List<PriceReduction> existingPriceReductions = item.getPriceReductions().stream()
                 .filter(priceReduction -> Objects.nonNull(priceReduction.getId()))
                 .collect(Collectors.toList());
@@ -128,11 +155,17 @@ public class ItemServiceImpl implements ItemService{
                 .filter(priceReduction -> Objects.isNull(priceReduction.getId()))
                 .collect(Collectors.toList());
 
+        for(PriceReduction priceReduction : allPriceReductions) {
+            Optional<PriceReduction> priceReductionDB = priceReductionRepository.findByCode(priceReduction.getCode());
+            if(!priceReductionDB.isPresent()) {
+                PriceReduction saved  = priceReductionRepository.save(priceReduction);
+                priceReduction.setId(saved.getId());
+            }
+        }
+
         for(PriceReduction priceReduction : existingPriceReductions) {
-            Optional<PriceReduction> priceReductionDB = priceReductionRepository.findById(priceReduction.getId());
-            if(!priceReductionDB.isPresent())
-                return null;
-            allPriceReductions.add(priceReductionDB.get());
+            if(priceReductionRepository.findByCode(priceReduction.getCode()).isPresent())
+                allPriceReductions.add(priceReduction);
         }
 
         return allPriceReductions;

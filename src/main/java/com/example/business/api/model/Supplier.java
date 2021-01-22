@@ -1,6 +1,7 @@
 package com.example.business.api.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -67,5 +68,12 @@ public class Supplier {
 
     public void setItems(Set<Item> items) {
         this.items = items;
+    }
+
+    public void addItem(Item item) {
+        if(items == null) {
+            items = new HashSet<>();
+        }
+        items.add(item);
     }
 }

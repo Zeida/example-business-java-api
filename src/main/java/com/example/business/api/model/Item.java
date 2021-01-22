@@ -2,6 +2,8 @@ package com.example.business.api.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,14 +22,14 @@ public class Item {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private Double price;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", columnDefinition = "varchar(25) default 'ACTIVE'")
-    private ItemStateEnum state;
+    private ItemStateEnum state = ItemStateEnum.ACTIVE;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "item_supplier",
             joinColumns = { @JoinColumn(name = "item_id") },
@@ -148,5 +150,21 @@ public class Item {
 
     public void setCreator(User creator) {
         this.creator = creator;
+    }
+
+    public void addSupplier(Supplier supplier) {
+        if(suppliers == null) {
+            suppliers = new HashSet<>();
+        }
+        supplier.addItem(this);
+        suppliers.add(supplier);
+    }
+
+    public void addPriceReduction(PriceReduction priceReduction) {
+        if(priceReductions == null) {
+            priceReductions = new ArrayList<>();
+        }
+        priceReduction.setItem(this);
+        priceReductions.add(priceReduction);
     }
 }

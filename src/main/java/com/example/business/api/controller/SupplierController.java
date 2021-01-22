@@ -3,7 +3,6 @@ package com.example.business.api.controller;
 import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,7 @@ public class SupplierController {
     @PutMapping(path = "/suppliers/{name}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public void updateSupplierByName(@PathVariable String name, @RequestBody SupplierDTO item) throws ChangeSetPersister.NotFoundException {
+    public void updateSupplierByName(@PathVariable String name, @RequestBody SupplierDTO item) {
         supplierService.updateSupplierWithName(item, name);
     }
 }

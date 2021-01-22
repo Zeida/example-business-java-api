@@ -1,9 +1,12 @@
 package com.example.business.api.dto;
 
 import com.example.business.api.model.ItemStateEnum;
+import com.example.business.api.model.PriceReduction;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -96,5 +99,21 @@ public class ItemDTO implements Serializable {
 
     public void setCreator(UserDTO creator) {
         this.creator = creator;
+    }
+
+    public void addItem(SupplierDTO supplier) {
+        if(suppliers == null) {
+            suppliers = new HashSet<>();
+        }
+        supplier.addItem(this);
+        suppliers.add(supplier);
+    }
+
+    public void addPriceReduction(PriceReductionDTO priceReduction) {
+        if(priceReductions == null) {
+            priceReductions = new ArrayList<>();
+        }
+        priceReduction.setItem(this);
+        priceReductions.add(priceReduction);
     }
 }
