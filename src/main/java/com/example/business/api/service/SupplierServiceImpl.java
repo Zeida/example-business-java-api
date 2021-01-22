@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,26 +35,33 @@ public class SupplierServiceImpl implements SupplierService {
         return convertIterable2DTO(suppliers);
     }
 
+    @Transactional
     public void saveSupplier(SupplierDTO dto) {
-        if(supplierRepository.findByName(dto.getName()).isPresent())
+        if (supplierRepository.findByName(dto.getName()).isPresent())
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Invalid supplier, '%s' already exists", dto.getName()));
 
         Supplier supplier = convert2Entity(dto);
-        if(supplier != null) {
-            Set<Item> allItems = processItems(supplier);
-            if(allItems == null)
-                allItems = new HashSet<>();
 
-            supplier.setItems(allItems);
+        supplierRepository.save(supplier);
 
-            supplierRepository.save(supplier);
+        Set<Item> items = new HashSet<>(supplier.getItems());
+
+        for(Item item : items) {
+            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
+
+            if(itemDB.isPresent()) {
+                itemDB.get().addSupplier(supplier);
+            } else {
+                itemRepository.save(item);
+                item.addSupplier(supplier);
+            }
         }
     }
 
     public SupplierDTO getSupplierByName(String name) {
         Optional<Supplier> supplier = supplierRepository.findByName(name);
-        if(supplier.isPresent()) {
+        if (supplier.isPresent()) {
             return convert2DTO(supplier.get());
         }
 
@@ -62,32 +70,41 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     public void updateSupplierWithName(SupplierDTO dto, String name) {
+        if (!name.equals(dto.getName()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("Expected to update the supplier '%s'," +
+                            " supplier '%s' given.", name, dto.getName()));
+
         Optional<Supplier> currentSupplier = supplierRepository.findByName(name);
-        if(!currentSupplier.isPresent()) {
+        if (!currentSupplier.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("The supplier '%s' doest not exist", name));
         }
 
         Supplier supplier = convert2Entity(dto);
-        supplier.setId(currentSupplier.get().getId());
+        if (supplier != null) {
+            Set<Item> allItems = processItems(supplier);
 
-        supplierRepository.save(supplier);
+            //supplier.setItems(allItems);
+
+            supplierRepository.save(supplier);
+        }
     }
 
     public SupplierDTO convert2DTO(Supplier entity) {
-        if(entity != null)
+        if (entity != null)
             return modelMapper.map(entity, SupplierDTO.class);
         return null;
     }
 
     public Supplier convert2Entity(SupplierDTO dto) {
-        if(dto != null)
+        if (dto != null)
             return modelMapper.map(dto, Supplier.class);
         return null;
     }
 
     public Iterable<SupplierDTO> convertIterable2DTO(Iterable<Supplier> iterableEntities) {
-        if(iterableEntities != null)
+        if (iterableEntities != null)
             return StreamSupport.stream(iterableEntities.spliterator(), false)
                     .map(supplier -> modelMapper.map(supplier, SupplierDTO.class))
                     .collect(Collectors.toList());
@@ -95,7 +112,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     public Iterable<Supplier> convertIterable2Entity(Iterable<SupplierDTO> iterableDTOs) {
-        if(iterableDTOs != null)
+        if (iterableDTOs != null)
             return StreamSupport.stream(iterableDTOs.spliterator(), false)
                     .map(supplierDTO -> modelMapper.map(supplierDTO, Supplier.class))
                     .collect(Collectors.toSet());
@@ -104,22 +121,36 @@ public class SupplierServiceImpl implements SupplierService {
 
     private Set<Item> processItems(Supplier supplier) {
         Set<Item> existingItems = new HashSet<>();
-        if(supplier.getItems() != null)
+        if (supplier.getItems() != null)
             existingItems = supplier.getItems().stream()
                     .filter(item -> Objects.nonNull(item.getId()))
                     .collect(Collectors.toSet());
 
         Set<Item> allItems = new HashSet<>();
-        if(supplier.getItems() != null)
+        if (supplier.getItems() != null)
             allItems = supplier.getItems().stream()
                     .filter(item -> Objects.isNull(item.getId()))
                     .collect(Collectors.toSet());
 
-        for(Item item : existingItems) {
+        for (Item item : allItems) {
             Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
-            if(!itemDB.isPresent())
-                return null;
-            allItems.add(itemDB.get());
+            if (!itemDB.isPresent()) {
+                Item saved = itemRepository.save(item);
+                Set <Supplier> s = new HashSet<>();
+                s.add(supplier);
+                item.setSuppliers(s);
+            }
+        }
+
+        for (Item item : existingItems) {
+            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
+            if (itemDB.isPresent()) {
+                Item itemToUpdate = itemDB.get();
+
+                if (itemToUpdate.getSuppliers().add(supplier)) {
+                    allItems.add(itemToUpdate);
+                }
+            }
         }
 
         return allItems;

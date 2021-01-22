@@ -1,8 +1,10 @@
 package com.example.business.api.dto;
 
+import com.example.business.api.model.Item;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 public class SupplierDTO implements Serializable {
@@ -45,5 +47,12 @@ public class SupplierDTO implements Serializable {
 
     public void setItems(Set<ItemDTO> items) {
         this.items = items;
+    }
+
+    public void addItem(ItemDTO item) {
+        if(items == null) {
+            items = new HashSet<>();
+        }
+        items.add(item);
     }
 }

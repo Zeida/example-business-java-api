@@ -4,6 +4,7 @@ import com.example.business.api.model.ItemStateEnum;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -96,5 +97,13 @@ public class ItemDTO implements Serializable {
 
     public void setCreator(UserDTO creator) {
         this.creator = creator;
+    }
+
+    public void addItem(SupplierDTO supplier) {
+        if(suppliers == null) {
+            suppliers = new HashSet<>();
+        }
+        supplier.addItem(this);
+        suppliers.add(supplier);
     }
 }

@@ -3,11 +3,9 @@ package com.example.business.api.controller;
 import com.example.business.api.dto.PriceReductionDTO;
 import com.example.business.api.service.PriceReductionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class PriceReductionController {
@@ -31,20 +29,14 @@ public class PriceReductionController {
     @GetMapping(path = "/price-reductions/{code}")
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public PriceReductionDTO getPriceReductionFromCode(@PathVariable String code) {
-        try {
-            Long parsedCode = Long.parseLong(code);
-            return priceReductionService.getPriceReductionFromCode(parsedCode);
-        } catch(NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The price reduction code provided must be numerical-only", e);
-        }
+    public PriceReductionDTO getPriceReductionFromCode(@PathVariable Long code) {
+        return priceReductionService.getPriceReductionFromCode(code);
     }
 
     @PutMapping(path = "/price-reductions/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public void updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) throws ChangeSetPersister.NotFoundException {
+    public void updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) {
         priceReductionService.updatePriceReductionWithCode(priceReduction, code);
     }
 }

@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 public class PriceReductionDTO implements Serializable {
     private Long id;
 
+    private Long code;
+
     private Double amountDeducted;
 
     private LocalDateTime startDate;
@@ -23,6 +25,14 @@ public class PriceReductionDTO implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getCode() {
+        return code;
+    }
+
+    public void setCode(Long code) {
+        this.code = code;
     }
 
     public Double getAmountDeducted() {

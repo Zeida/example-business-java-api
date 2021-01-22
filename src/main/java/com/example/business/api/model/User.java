@@ -22,13 +22,7 @@ public class User {
     @Column(name = "role", columnDefinition = "varchar(25) default 'USER'")
     private UserRoleEnum role;
 
-    @OneToMany(
-            fetch = FetchType.LAZY,
-            mappedBy = "creator",
-            cascade = {
-                    CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
-            }
-    )
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "creator", cascade = CascadeType.ALL)
     private Set<Item> items;
 
     public User() {
