@@ -2,6 +2,7 @@ package com.example.business.api.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -157,5 +158,13 @@ public class Item {
         }
         supplier.addItem(this);
         suppliers.add(supplier);
+    }
+
+    public void addPriceReduction(PriceReduction priceReduction) {
+        if(priceReductions == null) {
+            priceReductions = new ArrayList<>();
+        }
+        priceReduction.setItem(this);
+        priceReductions.add(priceReduction);
     }
 }

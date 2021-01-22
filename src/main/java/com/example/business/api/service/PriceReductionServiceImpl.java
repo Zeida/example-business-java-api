@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,11 @@ public class PriceReductionServiceImpl implements PriceReductionService {
         return convertIterable2DTO(priceReductions);
     }
 
+    @Transactional
     public void savePriceReduction(PriceReductionDTO dto) {
+        if(dto.getAmountDeducted() == null || dto.getAmountDeducted() <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A price reduction must have the amount deducted > 0");
+
         if(dto.getItem() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A price reduction must me applied to an item.");
 
@@ -42,6 +47,9 @@ public class PriceReductionServiceImpl implements PriceReductionService {
 
         LocalDateTime endDate = dto.getEndDate();
         LocalDateTime startDate = dto.getStartDate() == null ? LocalDateTime.now() : dto.getStartDate();
+
+        if(endDate.isBefore(startDate))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End date should be a date after start date");
 
         if(priceReductionRepository.findByCode(dto.getCode()).isPresent())
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -61,7 +69,15 @@ public class PriceReductionServiceImpl implements PriceReductionService {
                 }
             }
             PriceReduction priceReduction = convert2Entity(dto);
-            priceReductionRepository.save(priceReduction);
+            priceReduction.setStartDate(startDate);
+
+            itemRepository.save(parentItem);
+
+            parentItem.addPriceReduction(priceReduction);
+            priceReduction.setItem(parentItem);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Invalid item, '%s' doest not exists", dto.getItem().getCode()));
         }
 
     }
@@ -83,8 +99,20 @@ public class PriceReductionServiceImpl implements PriceReductionService {
                             " price reduction '%s' given.", code, dto.getCode()));
         }
 
+        if(dto.getAmountDeducted() == null || dto.getAmountDeducted() <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A price reduction must have the amount deducted > 0");
+
         if(dto.getItem() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A price reduction must me applied to an item.");
+
+        if(dto.getEndDate() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A price reduction must have an end date.");
+
+        LocalDateTime endDate = dto.getEndDate();
+        LocalDateTime startDate = dto.getStartDate() == null ? LocalDateTime.now() : dto.getStartDate();
+
+        if(endDate.isBefore(startDate))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End date should be a date after start date");
 
         if(!priceReductionRepository.findByCode(code).isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -100,7 +128,16 @@ public class PriceReductionServiceImpl implements PriceReductionService {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
                         "A price reduction already exists in the current date range.");
             }
-            PriceReduction priceReduction = convert2Entity(dto);
+
+            PriceReduction priceReduction = priceReductionRepository.findByCode(code).get();
+            priceReduction.setStartDate(startDate);
+            priceReduction.setEndDate(endDate);
+            priceReduction.setAmountDeducted(dto.getAmountDeducted());
+
+            itemRepository.save(parentItem);
+
+            parentItem.addPriceReduction(priceReduction);
+
             priceReductionRepository.save(priceReduction);
         }
     }

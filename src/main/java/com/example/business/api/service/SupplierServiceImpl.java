@@ -1,6 +1,5 @@
 package com.example.business.api.service;
 
-import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.model.Item;
 import com.example.business.api.model.Supplier;
@@ -14,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
