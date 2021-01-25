@@ -29,7 +29,7 @@ public class Item {
     @Column(name = "state", columnDefinition = "varchar(25) default 'ACTIVE'")
     private ItemStateEnum state = ItemStateEnum.ACTIVE;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "item_supplier",
             joinColumns = { @JoinColumn(name = "item_id") },
@@ -37,7 +37,7 @@ public class Item {
     )
     private Set<Supplier> suppliers;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     private List<PriceReduction> priceReductions;
 
     @Column(name = "creation_date", columnDefinition = "timestamp default current_timestamp()")
