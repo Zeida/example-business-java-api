@@ -3,8 +3,10 @@ package com.example.business.api.service;
 import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.model.Item;
 import com.example.business.api.model.Supplier;
+import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.SupplierRepository;
+import com.example.business.api.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,9 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private ItemService itemService;
@@ -97,9 +102,16 @@ public class SupplierServiceImpl implements SupplierService {
                 itemDB.get().addSupplier(supplier);
                 supplier.addItem(itemDB.get());
             } else {
-                itemRepository.save(item);
-                item.addSupplier(supplier);
-                supplier.addItem(item);
+                Optional<User> creator = userRepository.findByUsername(item.getCreator().getUsername());
+                if(creator.isPresent()) {
+                    item.setCreator(creator.get());
+                    itemRepository.save(item);
+                    item.addSupplier(supplier);
+                    supplier.addItem(item);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            String.format("Invalid user creator, '%s' does not exists", item.getCreator().getUsername()));
+                }
             }
         }
     }
