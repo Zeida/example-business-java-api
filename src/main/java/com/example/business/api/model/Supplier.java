@@ -19,7 +19,7 @@ public class Supplier {
     @Column(name = "country")
     private String country;
 
-    @ManyToMany(mappedBy = "suppliers", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "suppliers")
     private Set<Item> items;
 
     public Supplier() {

@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService{
         itemRepository.save(item);
 
         if(item.getSuppliers() != null) {
-            Set<Supplier> suppliers = item.getSuppliers();
+            Set<Supplier> suppliers = new HashSet<>(item.getSuppliers());
 
             for(Supplier supplier : suppliers) {
                 Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
