@@ -60,7 +60,7 @@ public class ItemServiceImpl implements ItemService{
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid item, '%s' already exists", dto.getCode()));
 
         if(!userRepository.findByUsername(dto.getCreator().getUsername()).isPresent())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid user creator, '%s' does not exists", dto.getCode()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The user '%s' does not exist", dto.getCreator().getUsername()));
 
         User creator = userRepository.findByUsername(dto.getCreator().getUsername()).get();
 
@@ -109,7 +109,7 @@ public class ItemServiceImpl implements ItemService{
             return convert2DTO(item.get());
         }
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exist", code));
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' does not exist", code));
     }
 
     @Transactional
@@ -121,7 +121,7 @@ public class ItemServiceImpl implements ItemService{
         }
 
         if(!itemRepository.findByCode(code).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exists", code));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' does not exist", code));
         }
 
         Item item = itemRepository.findByCode(code).get();
@@ -131,33 +131,46 @@ public class ItemServiceImpl implements ItemService{
 
         Iterable<Supplier> suppliers = supplierService.convertIterable2Entity(dto.getSuppliers());
 
-        for(Supplier supplier : suppliers) {
-            Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
+        if(suppliers != null) {
+            for (Supplier supplier : suppliers) {
+                Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
 
-            if(supplierDB.isPresent()) {
-                supplierDB.get().addItem(item);
-                item.addSupplier(supplierDB.get());
-            } else {
-                supplierRepository.save(supplier);
-                supplier.addItem(item);
-                item.addSupplier(supplier);
+                if (supplierDB.isPresent()) {
+                    supplierDB.get().addItem(item);
+                    item.addSupplier(supplierDB.get());
+                } else {
+                    supplierRepository.save(supplier);
+                    supplier.addItem(item);
+                    item.addSupplier(supplier);
+                }
             }
         }
 
         Iterable<PriceReduction> priceReductions = priceReductionService.convertIterable2Entity(dto.getPriceReductions());
 
-        for(PriceReduction priceReduction : priceReductions) {
-            Optional<PriceReduction> priceReductionDB = priceReductionRepository.findByCode(priceReduction.getCode());
+        if(priceReductions != null) {
+            for (PriceReduction priceReduction : priceReductions) {
+                Optional<PriceReduction> priceReductionDB = priceReductionRepository.findByCode(priceReduction.getCode());
 
-            if(priceReductionDB.isPresent()) {
-                priceReductionDB.get().setItem(item);
-                item.addPriceReduction(priceReductionDB.get());
-            } else {
-                priceReduction.setItem(item);
-                priceReductionRepository.save(priceReduction);
-                item.addPriceReduction(priceReduction);
+                if (priceReductionDB.isPresent()) {
+                    priceReductionDB.get().setItem(item);
+                    item.addPriceReduction(priceReductionDB.get());
+                } else {
+                    priceReduction.setItem(item);
+                    priceReductionRepository.save(priceReduction);
+                    item.addPriceReduction(priceReduction);
+                }
             }
         }
+    }
+
+    public void deleteItem(ItemDTO dto) {
+        Optional<Item> item = itemRepository.findByCode(dto.getCode());
+        if(!item.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("The item '%s' does not exist", dto.getCode()));
+        }
+        itemRepository.delete(item.get());
     }
 
     public ItemDTO convert2DTO(Item entity) {

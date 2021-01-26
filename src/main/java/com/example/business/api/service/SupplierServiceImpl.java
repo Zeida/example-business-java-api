@@ -109,7 +109,7 @@ public class SupplierServiceImpl implements SupplierService {
                     item.addSupplier(supplier);
                     supplier.addItem(item);
                 } else {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                             String.format("Invalid user creator, '%s' does not exists", item.getCreator().getUsername()));
                 }
             }

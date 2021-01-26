@@ -37,7 +37,7 @@ public class Item {
     )
     private Set<Supplier> suppliers;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private List<PriceReduction> priceReductions;
 
     @Column(name = "creation_date", columnDefinition = "timestamp default current_timestamp()")

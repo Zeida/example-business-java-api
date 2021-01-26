@@ -8,5 +8,6 @@ public interface ItemService extends BaseService<Item, ItemDTO>{
     Iterable<ItemDTO> getAllItems();
     void saveItem(ItemDTO dto) throws ChangeSetPersister.NotFoundException;
     ItemDTO getItemByCode(Long code);
-    void updateItemWithCode(ItemDTO dto, Long code) throws ChangeSetPersister.NotFoundException;
+    void updateItemWithCode(ItemDTO dto, Long code);
+    void deleteItem(ItemDTO dto);
 }
