@@ -8,6 +8,8 @@ import com.example.business.api.repository.PriceReductionRepository;
 import com.example.business.api.repository.SupplierRepository;
 import com.example.business.api.repository.UserRepository;
 import com.example.business.api.service.ItemServiceImpl;
+import com.example.business.api.service.PriceReductionService;
+import com.example.business.api.service.SupplierService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +32,12 @@ public class ItemServiceTest {
     @Spy
     @InjectMocks
     private ItemServiceImpl itemService;
+
+    @Mock
+    private SupplierService supplierService;
+
+    @Mock
+    private PriceReductionService priceReductionService;
 
     @Mock
     private ModelMapper modelMapper;
@@ -218,5 +226,42 @@ public class ItemServiceTest {
         Assert.assertEquals(expectedMessage, actualMessage);
 
         Mockito.verify(itemService, Mockito.times(1)).saveItem(itemToAdd);
+    }
+
+    @Test
+    public void updateItemWithExistingCodeAndNoIterablesAttributes() {
+        ItemDTO itemToUpdate = new ItemDTO();
+        itemToUpdate.setCode(1L);
+
+        Item actualItem = new Item();
+        actualItem.setCode(1L);
+
+        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.of(actualItem));
+        Mockito.doReturn(null).when(supplierService).convertIterable2Entity(null);
+        Mockito.doReturn(null).when(priceReductionService).convertIterable2Entity(null);
+
+        itemService.updateItemWithCode(itemToUpdate, 1L);
+
+        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(itemToUpdate, 1L);
+    }
+
+    @Test
+    public void updateItemWithNoExistingCodeAndNoIterablesAttributes() {
+        ItemDTO itemToUpdate = new ItemDTO();
+        itemToUpdate.setCode(1L);
+
+        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.empty());
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.updateItemWithCode(itemToUpdate, 1L));
+
+        String expectedMessage = String.format("%s \"The item '%s' doest not exist\"",
+                HttpStatus.NOT_FOUND.toString(), itemToUpdate.getCode());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(itemToUpdate, 1L);
     }
 }
