@@ -60,7 +60,7 @@ public class ItemServiceImpl implements ItemService{
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid item, '%s' already exists", dto.getCode()));
 
         if(!userRepository.findByUsername(dto.getCreator().getUsername()).isPresent())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The user '%s' doest not exist", dto.getCreator().getUsername()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The user '%s' does not exist", dto.getCreator().getUsername()));
 
         User creator = userRepository.findByUsername(dto.getCreator().getUsername()).get();
 
@@ -109,7 +109,7 @@ public class ItemServiceImpl implements ItemService{
             return convert2DTO(item.get());
         }
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exist", code));
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' does not exist", code));
     }
 
     @Transactional
@@ -121,7 +121,7 @@ public class ItemServiceImpl implements ItemService{
         }
 
         if(!itemRepository.findByCode(code).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exist", code));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' does not exist", code));
         }
 
         Item item = itemRepository.findByCode(code).get();
@@ -167,7 +167,8 @@ public class ItemServiceImpl implements ItemService{
     public void deleteItem(ItemDTO dto) {
         Optional<Item> item = itemRepository.findByCode(dto.getCode());
         if(!item.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The item to remove does not exist.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("The item '%s' does not exist", dto.getCode()));
         }
         itemRepository.delete(item.get());
     }
