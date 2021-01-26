@@ -44,7 +44,7 @@ public class Item {
     private LocalDateTime creationDate;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User creator;
 
     public Item() {

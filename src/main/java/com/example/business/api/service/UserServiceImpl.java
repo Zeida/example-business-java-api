@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -64,13 +65,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional
     public void removeUser(UserDTO dto) {
-        User user = convert2Entity(dto);
-        if(!userRepository.findByUsername(user.getUsername()).isPresent()) {
+        Optional<User> user = userRepository.findByUsername(dto.getUsername());
+        if(!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");
         }
-
-        userRepository.delete(user);
+        for(Item item : user.get().getItems()) {
+            item.setCreator(null);
+        }
+        user.get().setItems(null);
+        userRepository.delete(user.get());
     }
 
     private String getJWTTokenByUser(UserDTO user) {
