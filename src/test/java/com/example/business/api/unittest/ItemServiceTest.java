@@ -2,11 +2,11 @@ package com.example.business.api.unittest;
 
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.UserDTO;
-import com.example.business.api.model.Item;
-import com.example.business.api.model.User;
+import com.example.business.api.model.*;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
 import com.example.business.api.repository.SupplierRepository;
+import com.example.business.api.repository.UserRepository;
 import com.example.business.api.service.ItemServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,7 +17,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +42,9 @@ public class ItemServiceTest {
 
     @Mock
     private PriceReductionRepository priceReductionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Test
     public void findAllItemsWithOneItem() {
@@ -65,8 +71,8 @@ public class ItemServiceTest {
         Mockito.doReturn(itemsDTO).when(itemService).convertIterable2DTO(items);
 
         Iterable<ItemDTO> allItems = itemService.getAllItems();
-
         Assert.assertEquals(new Long(1L), allItems.iterator().next().getId());
+        Mockito.verify(itemService, Mockito.times(1)).getAllItems();
     }
 
     @Test
@@ -112,6 +118,7 @@ public class ItemServiceTest {
         Iterable<ItemDTO> allItems = itemService.getAllItems();
 
         allItems.forEach(givenItem -> Assert.assertTrue(itemsDTO.contains(givenItem)));
+        Mockito.verify(itemService, Mockito.times(1)).getAllItems();
     }
 
     @Test
@@ -129,6 +136,7 @@ public class ItemServiceTest {
         Mockito.doReturn(itemDTO).when(itemService).convert2DTO(itemFromDB);
 
         Assert.assertEquals(code, itemService.getItemByCode(code).getCode());
+        Mockito.verify(itemService, Mockito.times(1)).getItemByCode(code);
     }
 
     @Test
@@ -144,6 +152,44 @@ public class ItemServiceTest {
 
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.empty());
 
-        Assert.assertNull(itemService.getItemByCode(code));
+        Exception exception = Assert.assertThrows(ResponseStatusException.class, () -> this.itemService.getItemByCode(code));
+
+        String expectedMessage = String.format("%s \"The item '%s' doest not exist\"",
+                HttpStatus.NOT_FOUND.toString(), code);
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+        Mockito.verify(itemService, Mockito.times(1)).getItemByCode(code);
+    }
+
+    @Test
+    public void addNewItem() {
+        UserDTO user = new UserDTO();
+        user.setUsername("user");
+        user.setPassword("hashed-password-goes-here");
+        user.setItems(new HashSet<>());
+
+        ItemDTO itemToAdd = new ItemDTO();
+        itemToAdd.setCode(1L);
+        itemToAdd.setPrice(12.5);
+        itemToAdd.setCreator(user);
+
+        user.getItems().add(itemToAdd);
+
+        User actualUser = new User(1L, "user", "hashed-password-goes-here", new HashSet<>());
+
+        Item actualItem = new Item(1L, 1L, null, 12.5,
+                ItemStateEnum.ACTIVE, null, null, LocalDateTime.now(), actualUser);
+
+        actualUser.getItems().add(actualItem);
+
+        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.empty());
+        Mockito.doReturn(actualItem).when(itemService).convert2Entity(itemToAdd);
+        Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(actualUser));
+
+        itemService.saveItem(itemToAdd);
+
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(itemToAdd);
     }
 }
