@@ -112,6 +112,7 @@ public class ItemServiceImpl implements ItemService{
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' doest not exist", code));
     }
 
+    @Transactional
     public void updateItemWithCode(ItemDTO dto, Long code) {
         if(!dto.getCode().equals(code)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -152,8 +153,8 @@ public class ItemServiceImpl implements ItemService{
                 priceReductionDB.get().setItem(item);
                 item.addPriceReduction(priceReductionDB.get());
             } else {
-                priceReductionRepository.save(priceReduction);
                 priceReduction.setItem(item);
+                priceReductionRepository.save(priceReduction);
                 item.addPriceReduction(priceReduction);
             }
         }
