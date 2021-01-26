@@ -44,7 +44,15 @@ public class ItemController {
     @PutMapping(path = "/items/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public void updateItemByCode(@PathVariable Long code, @RequestBody ItemDTO item) throws ChangeSetPersister.NotFoundException {
+    public void updateItemByCode(@PathVariable Long code, @RequestBody ItemDTO item) {
         itemService.updateItemWithCode(item, code);
     }
+
+    @DeleteMapping(path = "/items")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteItem(@RequestBody ItemDTO item) {
+        itemService.deleteItem(item);
+    }
+
 }

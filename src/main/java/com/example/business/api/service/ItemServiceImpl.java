@@ -160,6 +160,14 @@ public class ItemServiceImpl implements ItemService{
         }
     }
 
+    public void deleteItem(ItemDTO dto) {
+        Optional<Item> item = itemRepository.findByCode(dto.getCode());
+        if(!item.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The item to remove does not exist.");
+        }
+        itemRepository.delete(item.get());
+    }
+
     public ItemDTO convert2DTO(Item entity) {
         if(entity != null)
             return modelMapper.map(entity, ItemDTO.class);
