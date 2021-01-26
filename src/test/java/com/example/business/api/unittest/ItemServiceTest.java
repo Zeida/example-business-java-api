@@ -192,4 +192,31 @@ public class ItemServiceTest {
 
         Mockito.verify(itemService, Mockito.times(1)).saveItem(itemToAdd);
     }
+
+    @Test
+    public void addNewItemButUserDoestNotExist() {
+        UserDTO user = new UserDTO();
+        user.setUsername("user");
+        user.setPassword("hashed-password-goes-here");
+        user.setItems(new HashSet<>());
+
+        ItemDTO itemToAdd = new ItemDTO();
+        itemToAdd.setCode(1L);
+        itemToAdd.setPrice(12.5);
+        itemToAdd.setCreator(user);
+
+        user.getItems().add(itemToAdd);
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.saveItem(itemToAdd));
+
+        String expectedMessage = String.format("%s \"The user '%s' doest not exist\"",
+                HttpStatus.NOT_FOUND.toString(), user.getUsername());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(itemToAdd);
+    }
 }

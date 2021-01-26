@@ -60,7 +60,7 @@ public class ItemServiceImpl implements ItemService{
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid item, '%s' already exists", dto.getCode()));
 
         if(!userRepository.findByUsername(dto.getCreator().getUsername()).isPresent())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid user creator, '%s' does not exists", dto.getCode()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The user '%s' doest not exist", dto.getCreator().getUsername()));
 
         User creator = userRepository.findByUsername(dto.getCreator().getUsername()).get();
 
