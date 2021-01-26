@@ -71,10 +71,10 @@ public class PriceReductionServiceImpl implements PriceReductionService {
             PriceReduction priceReduction = convert2Entity(dto);
             priceReduction.setStartDate(startDate);
 
-            itemRepository.save(parentItem);
-
             parentItem.addPriceReduction(priceReduction);
             priceReduction.setItem(parentItem);
+
+            itemRepository.save(parentItem);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Invalid item, '%s' doest not exists", dto.getItem().getCode()));
