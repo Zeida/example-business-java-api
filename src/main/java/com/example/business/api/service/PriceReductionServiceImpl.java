@@ -77,7 +77,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
             itemRepository.save(parentItem);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Invalid item, '%s' doest not exists", dto.getItem().getCode()));
+                    String.format("Invalid item, '%s' does not exists", dto.getItem().getCode()));
         }
 
     }
@@ -89,7 +89,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("The price reduction '%s' doest not exist", code));
+                String.format("The price reduction '%s' does not exist", code));
     }
 
     public void updatePriceReductionWithCode(PriceReductionDTO dto, Long code) {
@@ -116,17 +116,19 @@ public class PriceReductionServiceImpl implements PriceReductionService {
 
         if(!priceReductionRepository.findByCode(code).isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("The price reduction '%s' doest not exists", code));
+                    String.format("The price reduction '%s' does not exist", code));
 
         Optional<Item> item = itemRepository.findByCode(dto.getItem().getCode());
         if(item.isPresent()) {
             Item parentItem = item.get();
-            if((parentItem.getPriceReductions().stream()
-                    .anyMatch(priceReduction -> priceReduction.getStartDate().isBefore(LocalDateTime.now())
-                            && priceReduction.getEndDate().isAfter(LocalDateTime.now())
-                            && !priceReduction.getCode().equals(code)))) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "A price reduction already exists in the current date range.");
+            if(parentItem.getPriceReductions() != null) {
+                if((parentItem.getPriceReductions().stream()
+                        .anyMatch(priceReduction -> priceReduction.getStartDate().isBefore(LocalDateTime.now())
+                                && priceReduction.getEndDate().isAfter(LocalDateTime.now())
+                                && !priceReduction.getCode().equals(code)))) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "A price reduction already exists in the current date range.");
+                }
             }
 
             PriceReduction priceReduction = priceReductionRepository.findByCode(code).get();
