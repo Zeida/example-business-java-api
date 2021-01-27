@@ -52,6 +52,12 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Invalid username, '%s' already exists", dto.getUsername()));
 
+        if(dto.getUsername().isEmpty() || dto.getUsername() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A username must be provided");
+
+        if(dto.getPassword().isEmpty() || dto.getPassword() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A password must be provided");
+
         User user = convert2Entity(dto);
         if(user != null) {
             Set<Item> allItems = processItems(user);
@@ -71,8 +77,10 @@ public class UserServiceImpl implements UserService {
         if(!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");
         }
-        for(Item item : user.get().getItems()) {
-            item.setCreator(null);
+        if(user.get().getItems() != null) {
+            for(Item item : user.get().getItems()) {
+                item.setCreator(null);
+            }
         }
         user.get().setItems(null);
         userRepository.delete(user.get());
