@@ -52,16 +52,18 @@ public class SupplierServiceImpl implements SupplierService {
 
         supplierRepository.save(supplier);
 
-        Set<Item> items = new HashSet<>(supplier.getItems());
+        if(supplier.getItems() != null) {
+            Set<Item> items = new HashSet<>(supplier.getItems());
 
-        for(Item item : items) {
-            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
+            for(Item item : items) {
+                Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
 
-            if(itemDB.isPresent()) {
-                itemDB.get().addSupplier(supplier);
-            } else {
-                itemRepository.save(item);
-                item.addSupplier(supplier);
+                if(itemDB.isPresent()) {
+                    itemDB.get().addSupplier(supplier);
+                } else {
+                    itemRepository.save(item);
+                    item.addSupplier(supplier);
+                }
             }
         }
     }
@@ -73,7 +75,7 @@ public class SupplierServiceImpl implements SupplierService {
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("The supplier '%s' doest not exist", name));
+                String.format("The supplier '%s' does not exist", name));
     }
 
     @Transactional
@@ -86,31 +88,33 @@ public class SupplierServiceImpl implements SupplierService {
         Optional<Supplier> currentSupplier = supplierRepository.findByName(name);
         if (!currentSupplier.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("The supplier '%s' doest not exist", name));
+                    String.format("The supplier '%s' does not exist", name));
         }
 
         Supplier supplier = currentSupplier.get();
 
         supplier.setCountry(dto.getCountry());
 
-        Iterable<Item> items = itemService.convertIterable2Entity(dto.getItems());
+        if(dto.getItems() != null) {
+            Iterable<Item> items = itemService.convertIterable2Entity(dto.getItems());
 
-        for(Item item : items) {
-            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
+            for(Item item : items) {
+                Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
 
-            if(itemDB.isPresent()) {
-                itemDB.get().addSupplier(supplier);
-                supplier.addItem(itemDB.get());
-            } else {
-                Optional<User> creator = userRepository.findByUsername(item.getCreator().getUsername());
-                if(creator.isPresent()) {
-                    item.setCreator(creator.get());
-                    itemRepository.save(item);
-                    item.addSupplier(supplier);
-                    supplier.addItem(item);
+                if(itemDB.isPresent()) {
+                    itemDB.get().addSupplier(supplier);
+                    supplier.addItem(itemDB.get());
                 } else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            String.format("Invalid user creator, '%s' does not exists", item.getCreator().getUsername()));
+                    Optional<User> creator = userRepository.findByUsername(item.getCreator().getUsername());
+                    if(creator.isPresent()) {
+                        item.setCreator(creator.get());
+                        itemRepository.save(item);
+                        item.addSupplier(supplier);
+                        supplier.addItem(item);
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                String.format("Invalid user creator, '%s' does not exists", item.getCreator().getUsername()));
+                    }
                 }
             }
         }
