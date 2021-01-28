@@ -1,6 +1,5 @@
 package com.example.business.api.dto;
 
-import com.example.business.api.model.Item;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.io.Serializable;

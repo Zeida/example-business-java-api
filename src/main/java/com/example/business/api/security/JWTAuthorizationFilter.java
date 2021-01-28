@@ -2,6 +2,7 @@ package com.example.business.api.security;
 
 import io.jsonwebtoken.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -16,7 +17,6 @@ import java.util.Collections;
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
     private final String HEADER = "Authorization";
     private final String PREFIX = "Bearer ";
-    private final String SECRET = "mySecretKey";
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
@@ -40,6 +40,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     private Claims validateToken(HttpServletRequest request) {
         String jwtToken = request.getHeader(HEADER).replace(PREFIX, "");
+        String SECRET = "mySecretKey";
         return Jwts.parser().setSigningKey(SECRET.getBytes()).parseClaimsJws(jwtToken).getBody();
     }
 

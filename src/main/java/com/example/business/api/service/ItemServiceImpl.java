@@ -9,6 +9,7 @@ import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
 import com.example.business.api.repository.SupplierRepository;
 import com.example.business.api.repository.UserRepository;
+import com.example.business.api.security.AuthenticationFacade;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -46,6 +49,9 @@ public class ItemServiceImpl implements ItemService{
     @Autowired
     private PriceReductionService priceReductionService;
 
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
+
     public Iterable<ItemDTO> getAllItems() {
         Iterable<Item> items = itemRepository.findAll();
         return convertIterable2DTO(items);
@@ -53,54 +59,29 @@ public class ItemServiceImpl implements ItemService{
 
     @Transactional
     public void saveItem(ItemDTO dto) {
-        if(dto.getCreator() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have an user associated");
-
         if(itemRepository.findByCode(dto.getCode()).isPresent())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invalid item, '%s' already exists", dto.getCode()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("Invalid item, '%s' already exists", dto.getCode()));
 
-        if(!userRepository.findByUsername(dto.getCreator().getUsername()).isPresent())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The user '%s' does not exist", dto.getCreator().getUsername()));
+        Optional<User> creator = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
 
-        User creator = userRepository.findByUsername(dto.getCreator().getUsername()).get();
+        if(!creator.isPresent())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This action cannot be done with the current user");
 
-        Item item = convert2Entity(dto);
-        item.setCreator(creator);
+        Item item = new Item();
+
+        convert2Entity(dto, item, "SaveItemMapping");
+
+        item.setCreator(creator.get());
 
         itemRepository.save(item);
 
-        if(item.getSuppliers() != null) {
-            Set<Supplier> suppliers = new HashSet<>(item.getSuppliers());
+        if(item.getSuppliers() != null)
+            itemSuppliersProcessing(item, new HashSet<>(item.getSuppliers()));
 
-            for(Supplier supplier : suppliers) {
-                Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
-
-                if(supplierDB.isPresent()) {
-                    supplierDB.get().addItem(item);
-                    item.getSuppliers().remove(supplier);
-                    item.addSupplier(supplierDB.get());
-                } else {
-                    supplierRepository.save(supplier);
-                    supplier.addItem(item);
-                    item.addSupplier(supplier);
-                }
-            }
-        }
-
-        if(item.getPriceReductions() != null) {
-            Set<PriceReduction> priceReductions = new HashSet<>(item.getPriceReductions());
-
-            for(PriceReduction priceReduction : priceReductions) {
-                Optional<PriceReduction> priceReductionDB = priceReductionRepository.findByCode(priceReduction.getCode());
-
-                if(priceReductionDB.isPresent()) {
-                    priceReductionDB.get().setItem(item);
-                } else {
-                    priceReduction.setItem(item);
-                    priceReductionRepository.save(priceReduction);
-                }
-            }
-        }
+        if(item.getPriceReductions() != null)
+            itemPriceReductionsProcessing(item, new HashSet<>(item.getPriceReductions()));
     }
 
     public ItemDTO getItemByCode(Long code) {
@@ -109,58 +90,38 @@ public class ItemServiceImpl implements ItemService{
             return convert2DTO(item.get());
         }
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' does not exist", code));
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("The item '%s' does not exist", code));
     }
 
     @Transactional
     public void updateItemWithCode(ItemDTO dto, Long code) {
         if(!dto.getCode().equals(code)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    String.format("Expected to update the item '%s'," +
-                            " item '%s' given.", code, dto.getCode()));
+                    String.format("Expected to update the item '%s', item '%s' given.", code, dto.getCode()));
         }
 
         if(!itemRepository.findByCode(code).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The item '%s' does not exist", code));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("The item '%s' does not exist", code));
         }
 
         Item item = itemRepository.findByCode(code).get();
-        item.setState(dto.getState());
-        item.setPrice(dto.getPrice());
-        item.setDescription(dto.getDescription());
 
-        Iterable<Supplier> suppliers = supplierService.convertIterable2Entity(dto.getSuppliers());
+        convert2Entity(dto, item, "UpdateItemMapping");
 
-        if(suppliers != null) {
-            for (Supplier supplier : suppliers) {
-                Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
-
-                if (supplierDB.isPresent()) {
-                    supplierDB.get().addItem(item);
-                    item.addSupplier(supplierDB.get());
-                } else {
-                    supplierRepository.save(supplier);
-                    supplier.addItem(item);
-                    item.addSupplier(supplier);
-                }
-            }
+        if(dto.getSuppliers() != null) {
+            Set<Supplier> suppliers = StreamSupport.stream(supplierService.convertIterable2Entity(dto.getSuppliers())
+                    .spliterator(), true)
+                    .collect(Collectors.toSet());
+            itemSuppliersProcessing(item, suppliers);
         }
 
-        Iterable<PriceReduction> priceReductions = priceReductionService.convertIterable2Entity(dto.getPriceReductions());
-
-        if(priceReductions != null) {
-            for (PriceReduction priceReduction : priceReductions) {
-                Optional<PriceReduction> priceReductionDB = priceReductionRepository.findByCode(priceReduction.getCode());
-
-                if (priceReductionDB.isPresent()) {
-                    priceReductionDB.get().setItem(item);
-                    item.addPriceReduction(priceReductionDB.get());
-                } else {
-                    priceReduction.setItem(item);
-                    priceReductionRepository.save(priceReduction);
-                    item.addPriceReduction(priceReduction);
-                }
-            }
+        if(dto.getPriceReductions() != null) {
+            Set<PriceReduction> priceReductions = StreamSupport.stream(priceReductionService.convertIterable2Entity(dto.getPriceReductions())
+                    .spliterator(), true)
+                    .collect(Collectors.toSet());
+            itemPriceReductionsProcessing(item, priceReductions);
         }
     }
 
@@ -171,6 +132,11 @@ public class ItemServiceImpl implements ItemService{
                     String.format("The item '%s' does not exist", dto.getCode()));
         }
         itemRepository.delete(item.get());
+    }
+
+    public void convert2Entity(ItemDTO dto, Item entity, String mappingName) {
+        if(entity != null && dto != null)
+            modelMapper.map(dto, entity, mappingName);
     }
 
     public ItemDTO convert2DTO(Item entity) {
@@ -199,5 +165,36 @@ public class ItemServiceImpl implements ItemService{
                     .map(itemDTO -> modelMapper.map(itemDTO, Item.class))
                     .collect(Collectors.toSet());
         return null;
+    }
+
+    private void itemSuppliersProcessing(Item item, Set<Supplier> suppliers) {
+        for(Supplier supplier : suppliers) {
+            Optional<Supplier> supplierDB = supplierRepository.findByName(supplier.getName());
+
+            if(supplierDB.isPresent()) {
+                supplierDB.get().addItem(item);
+                item.getSuppliers().remove(supplier);
+                item.addSupplier(supplierDB.get());
+            } else {
+                supplierRepository.save(supplier);
+                supplier.addItem(item);
+                item.addSupplier(supplier);
+            }
+        }
+    }
+
+    private void itemPriceReductionsProcessing(Item item, Set<PriceReduction> priceReductions) {
+        for(PriceReduction priceReduction : priceReductions) {
+            Optional<PriceReduction> priceReductionDB = priceReductionRepository.findByCode(priceReduction.getCode());
+
+            if(priceReductionDB.isPresent()) {
+                priceReductionDB.get().setItem(item);
+                item.addPriceReduction(priceReductionDB.get());
+            } else {
+                priceReduction.setItem(item);
+                priceReductionRepository.save(priceReduction);
+                item.addPriceReduction(priceReduction);
+            }
+        }
     }
 }

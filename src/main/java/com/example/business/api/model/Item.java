@@ -41,7 +41,7 @@ public class Item {
     private List<PriceReduction> priceReductions;
 
     @Column(name = "creation_date", columnDefinition = "timestamp default current_timestamp()")
-    private LocalDateTime creationDate;
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "user_id")

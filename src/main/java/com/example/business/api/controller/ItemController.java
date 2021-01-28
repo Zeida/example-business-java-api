@@ -3,11 +3,9 @@ package com.example.business.api.controller;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ItemController {
@@ -24,21 +22,15 @@ public class ItemController {
     @PostMapping(path = "/items", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public void addItem(@RequestBody ItemDTO item) throws ChangeSetPersister.NotFoundException {
+    public void addItem(@RequestBody ItemDTO item) {
         itemService.saveItem(item);
     }
 
     @GetMapping(path = "/items/{code}")
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public ItemDTO getItemByCode(@PathVariable String code) {
-        try {
-            Long parsedCode = Long.parseLong(code);
-            return itemService.getItemByCode(parsedCode);
-        } catch(NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The item code provided must be numerical-only", e);
-        }
+    public ItemDTO getItemByCode(@PathVariable Long code) {
+        return itemService.getItemByCode(code);
     }
 
     @PutMapping(path = "/items/{code}")

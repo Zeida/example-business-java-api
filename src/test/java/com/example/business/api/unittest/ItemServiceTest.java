@@ -2,14 +2,13 @@ package com.example.business.api.unittest;
 
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.UserDTO;
-import com.example.business.api.model.*;
+import com.example.business.api.model.Item;
+import com.example.business.api.model.ItemStateEnum;
+import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
-import com.example.business.api.repository.PriceReductionRepository;
-import com.example.business.api.repository.SupplierRepository;
 import com.example.business.api.repository.UserRepository;
+import com.example.business.api.security.AuthenticationFacade;
 import com.example.business.api.service.ItemServiceImpl;
-import com.example.business.api.service.PriceReductionService;
-import com.example.business.api.service.SupplierService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +19,12 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -34,25 +36,16 @@ public class ItemServiceTest {
     private ItemServiceImpl itemService;
 
     @Mock
-    private SupplierService supplierService;
-
-    @Mock
-    private PriceReductionService priceReductionService;
-
-    @Mock
     private ModelMapper modelMapper;
 
     @Mock
     private ItemRepository itemRepository;
 
     @Mock
-    private SupplierRepository supplierRepository;
-
-    @Mock
-    private PriceReductionRepository priceReductionRepository;
-
-    @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AuthenticationFacade authenticationFacade;
 
     @Test
     public void findAllItemsWithOneItem() {
@@ -193,8 +186,43 @@ public class ItemServiceTest {
         actualUser.getItems().add(actualItem);
 
         Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.empty());
-        Mockito.doReturn(actualItem).when(itemService).convert2Entity(itemToAdd);
         Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(actualUser));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return null;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return false;
+            }
+
+            @Override
+            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return actualUser.getUsername();
+            }
+        });
 
         itemService.saveItem(itemToAdd);
 
@@ -213,13 +241,51 @@ public class ItemServiceTest {
         itemToAdd.setPrice(12.5);
         itemToAdd.setCreator(user);
 
+        Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.empty());
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return null;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return false;
+            }
+
+            @Override
+            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return user.getUsername();
+            }
+        });
+
         user.getItems().add(itemToAdd);
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
                 () -> this.itemService.saveItem(itemToAdd));
 
-        String expectedMessage = String.format("%s \"The user '%s' does not exist\"",
-                HttpStatus.NOT_FOUND.toString(), user.getUsername());
+        String expectedMessage = String.format("%s \"This action cannot be done with the current user\"",
+                HttpStatus.FORBIDDEN.toString());
 
         String actualMessage = exception.getMessage();
 
@@ -237,8 +303,6 @@ public class ItemServiceTest {
         actualItem.setCode(1L);
 
         Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.of(actualItem));
-        Mockito.doReturn(null).when(supplierService).convertIterable2Entity(null);
-        Mockito.doReturn(null).when(priceReductionService).convertIterable2Entity(null);
 
         itemService.updateItemWithCode(itemToUpdate, 1L);
 

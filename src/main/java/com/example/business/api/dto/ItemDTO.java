@@ -1,7 +1,6 @@
 package com.example.business.api.dto;
 
 import com.example.business.api.model.ItemStateEnum;
-import com.example.business.api.model.PriceReduction;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
