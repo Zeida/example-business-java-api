@@ -1,7 +1,9 @@
 package com.example.business.api;
 
 import com.example.business.api.dto.ItemDTO;
+import com.example.business.api.dto.PriceReductionDTO;
 import com.example.business.api.model.Item;
+import com.example.business.api.model.PriceReduction;
 import com.example.business.api.security.AuthenticationFacade;
 import com.example.business.api.security.JWTAuthorizationFilter;
 import com.example.business.api.security.UserAuthentication;
@@ -30,7 +32,8 @@ public class ApiApplication {
 	@Bean
 	public ModelMapper modelMapper() {
 		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.typeMap(ItemDTO.class, Item.class, "UpdateItemMapping").setPropertyCondition(Conditions.isNotNull());
+		modelMapper.typeMap(ItemDTO.class, Item.class, "UpdateItemMapping")
+				.setPropertyCondition(Conditions.isNotNull());
 
 		modelMapper.typeMap(ItemDTO.class, Item.class, "UpdateItemMapping").addMappings(mapper -> {
 			mapper.skip(Item::setPriceReductions);
@@ -41,6 +44,16 @@ public class ApiApplication {
 			mapper.when(Conditions.isNotNull()).map(ItemDTO::getState, Item::setState);
 			mapper.when(Conditions.isNotNull()).map(ItemDTO::getCreationDate, Item::setCreationDate);
 		});
+
+		modelMapper.typeMap(PriceReductionDTO.class, PriceReduction.class, "UpdatePriceReductionMapping")
+				.setPropertyCondition(Conditions.isNotNull());
+
+		modelMapper.typeMap(PriceReductionDTO.class, PriceReduction.class, "UpdateItemMapping")
+				.addMappings(mapper -> mapper.skip(PriceReduction::setItem));
+
+		modelMapper.typeMap(PriceReductionDTO.class, PriceReduction.class, "SavePriceReductionMapping")
+				.addMappings(mapper -> mapper.when(Conditions.isNotNull())
+						.map(PriceReductionDTO::getStartDate, PriceReduction::setStartDate));
 
 		return modelMapper;
 	}

@@ -19,7 +19,7 @@ public class PriceReduction {
     private Double amountDeducted;
 
     @Column(name = "start_date", columnDefinition = "timestamp default current_timestamp()")
-    private LocalDateTime startDate;
+    private LocalDateTime startDate = LocalDateTime.now();
 
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;

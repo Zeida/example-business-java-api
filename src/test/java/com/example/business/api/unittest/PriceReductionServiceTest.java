@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +31,9 @@ public class PriceReductionServiceTest {
     @Spy
     @InjectMocks
     private PriceReductionServiceImpl priceReductionService;
+
+    @Mock
+    private ModelMapper modelMapper;
 
     @Mock
     private PriceReductionRepository priceReductionRepository;
@@ -124,7 +128,7 @@ public class PriceReductionServiceTest {
     }
 
     @Test
-    public void addNewSupplier() {
+    public void addNewPriceReduction() {
         Long code = 1L;
 
         Item item = new Item();
@@ -146,7 +150,6 @@ public class PriceReductionServiceTest {
         priceReductionDTO.setEndDate(priceReduction.getEndDate());
 
         Mockito.when(priceReductionRepository.findByCode(code)).thenReturn(Optional.empty());
-        Mockito.doReturn(priceReduction).when(priceReductionService).convert2Entity(priceReductionDTO);
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(item));
 
         priceReductionService.savePriceReduction(priceReductionDTO);
@@ -188,7 +191,7 @@ public class PriceReductionServiceTest {
     }
 
     @Test
-    public void updateNoExistingSupplier() {
+    public void updateNoExistingPriceReduction() {
         Long code = 1L;
 
         Item item = new Item();

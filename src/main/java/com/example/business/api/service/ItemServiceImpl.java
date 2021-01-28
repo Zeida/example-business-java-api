@@ -71,7 +71,7 @@ public class ItemServiceImpl implements ItemService{
 
         Item item = new Item();
 
-        convert2Entity(dto, item, "SaveItemMapping");
+        mergeDTO2Entity(dto, item, "SaveItemMapping");
 
         item.setCreator(creator.get());
 
@@ -108,7 +108,7 @@ public class ItemServiceImpl implements ItemService{
 
         Item item = itemRepository.findByCode(code).get();
 
-        convert2Entity(dto, item, "UpdateItemMapping");
+        mergeDTO2Entity(dto, item, "UpdateItemMapping");
 
         if(dto.getSuppliers() != null) {
             Set<Supplier> suppliers = StreamSupport.stream(supplierService.convertIterable2Entity(dto.getSuppliers())
@@ -134,7 +134,7 @@ public class ItemServiceImpl implements ItemService{
         itemRepository.delete(item.get());
     }
 
-    public void convert2Entity(ItemDTO dto, Item entity, String mappingName) {
+    public void mergeDTO2Entity(ItemDTO dto, Item entity, String mappingName) {
         if(entity != null && dto != null)
             modelMapper.map(dto, entity, mappingName);
     }
