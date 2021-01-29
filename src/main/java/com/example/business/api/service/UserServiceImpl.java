@@ -101,6 +101,10 @@ public class UserServiceImpl implements UserService {
         return "Bearer " + token;
     }
 
+    public void mergeDTO2Entity(UserDTO dto, User entity, String mappingName) {
+
+    }
+
     public UserDTO convert2DTO(User entity) {
         if(entity != null)
             return modelMapper.map(entity, UserDTO.class);

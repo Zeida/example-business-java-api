@@ -2,8 +2,10 @@ package com.example.business.api;
 
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.PriceReductionDTO;
+import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.model.Item;
 import com.example.business.api.model.PriceReduction;
+import com.example.business.api.model.Supplier;
 import com.example.business.api.security.AuthenticationFacade;
 import com.example.business.api.security.JWTAuthorizationFilter;
 import com.example.business.api.security.UserAuthentication;
@@ -43,6 +45,18 @@ public class ApiApplication {
 		modelMapper.typeMap(ItemDTO.class, Item.class, "SaveItemMapping").addMappings(mapper -> {
 			mapper.when(Conditions.isNotNull()).map(ItemDTO::getState, Item::setState);
 			mapper.when(Conditions.isNotNull()).map(ItemDTO::getCreationDate, Item::setCreationDate);
+		});
+
+		modelMapper.typeMap(SupplierDTO.class, Supplier.class, "UpdateSupplierMapping")
+				.setPropertyCondition(Conditions.isNotNull());
+
+		modelMapper.typeMap(SupplierDTO.class, Supplier.class, "UpdateSupplierMapping")
+				.addMappings(mapper -> {
+					mapper.skip(Supplier::setItems);
+		});
+
+		modelMapper.typeMap(SupplierDTO.class, Supplier.class, "SaveSupplierMapping").addMappings(mapper -> {
+
 		});
 
 		modelMapper.typeMap(PriceReductionDTO.class, PriceReduction.class, "UpdatePriceReductionMapping")

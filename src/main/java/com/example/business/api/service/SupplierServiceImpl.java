@@ -1,12 +1,15 @@
 package com.example.business.api.service;
 
+import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.model.Item;
+import com.example.business.api.model.PriceReduction;
 import com.example.business.api.model.Supplier;
 import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.SupplierRepository;
 import com.example.business.api.repository.UserRepository;
+import com.example.business.api.security.AuthenticationFacade;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,6 +40,9 @@ public class SupplierServiceImpl implements SupplierService {
     @Autowired
     private ItemService itemService;
 
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
+
     public Iterable<SupplierDTO> getAllSuppliers() {
         Iterable<Supplier> suppliers = supplierRepository.findAll();
         return convertIterable2DTO(suppliers);
@@ -48,24 +54,14 @@ public class SupplierServiceImpl implements SupplierService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Invalid supplier, '%s' already exists", dto.getName()));
 
-        Supplier supplier = convert2Entity(dto);
+        Supplier supplier = new Supplier();
+
+        mergeDTO2Entity(dto, supplier, "SaveSupplierMapping");
 
         supplierRepository.save(supplier);
 
-        if(supplier.getItems() != null) {
-            Set<Item> items = new HashSet<>(supplier.getItems());
-
-            for(Item item : items) {
-                Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
-
-                if(itemDB.isPresent()) {
-                    itemDB.get().addSupplier(supplier);
-                } else {
-                    itemRepository.save(item);
-                    item.addSupplier(supplier);
-                }
-            }
-        }
+        if(supplier.getItems() != null)
+            supplierItemsProcessing(supplier, new HashSet<>(dto.getItems()));
     }
 
     public SupplierDTO getSupplierByName(String name) {
@@ -93,31 +89,16 @@ public class SupplierServiceImpl implements SupplierService {
 
         Supplier supplier = currentSupplier.get();
 
-        supplier.setCountry(dto.getCountry());
+        mergeDTO2Entity(dto, supplier, "UpdateSupplierMapping");
 
         if(dto.getItems() != null) {
-            Iterable<Item> items = itemService.convertIterable2Entity(dto.getItems());
-
-            for(Item item : items) {
-                Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
-
-                if(itemDB.isPresent()) {
-                    itemDB.get().addSupplier(supplier);
-                    supplier.addItem(itemDB.get());
-                } else {
-                    Optional<User> creator = userRepository.findByUsername(item.getCreator().getUsername());
-                    if(creator.isPresent()) {
-                        item.setCreator(creator.get());
-                        itemRepository.save(item);
-                        item.addSupplier(supplier);
-                        supplier.addItem(item);
-                    } else {
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                String.format("Invalid user creator, '%s' does not exists", item.getCreator().getUsername()));
-                    }
-                }
-            }
+            supplierItemsProcessing(supplier, dto.getItems());
         }
+    }
+
+    public void mergeDTO2Entity(SupplierDTO dto, Supplier entity, String mappingName) {
+        if(entity != null && dto != null)
+            modelMapper.map(dto, entity, mappingName);
     }
 
     public SupplierDTO convert2DTO(Supplier entity) {
@@ -146,5 +127,29 @@ public class SupplierServiceImpl implements SupplierService {
                     .map(supplierDTO -> modelMapper.map(supplierDTO, Supplier.class))
                     .collect(Collectors.toSet());
         return null;
+    }
+
+    private void supplierItemsProcessing(Supplier supplier, Set<ItemDTO> items) {
+        for (ItemDTO item : items) {
+            Optional<Item> itemDB = itemRepository.findByCode(item.getCode());
+
+            if (itemDB.isPresent()) {
+                itemDB.get().addSupplier(supplier);
+            } else {
+                Optional<User> creator = userRepository.
+                        findByUsername(authenticationFacade.getAuthentication().getName());
+
+                if(!creator.isPresent())
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "This action cannot be done with the current user");
+
+                Item newItem = new Item();
+                itemService.mergeDTO2Entity(item, newItem, "SaveItemMapping");
+
+                itemRepository.save(newItem);
+                newItem.addSupplier(supplier);
+                newItem.setCreator(creator.get());
+            }
+        }
     }
 }

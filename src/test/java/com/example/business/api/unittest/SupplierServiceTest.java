@@ -203,8 +203,6 @@ public class SupplierServiceTest {
         actualSupplier.setItems(actualItems);
 
         Mockito.when(supplierRepository.findByName("Supplier Test")).thenReturn(Optional.empty());
-        Mockito.doReturn(actualSupplier).when(supplierService).convert2Entity(supplierDTO);
-        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.of(actualItem));
 
         supplierService.saveSupplier(supplierDTO);
 
