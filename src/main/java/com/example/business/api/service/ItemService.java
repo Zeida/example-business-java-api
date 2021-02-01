@@ -10,4 +10,5 @@ public interface ItemService extends BaseService<Item, ItemDTO>{
     void updateItemWithCode(ItemDTO dto, Long code);
     void deleteItem(ItemDTO dto);
     Iterable<ItemDTO> findCheapestItemPerSupplier();
+    void deactivateItem(Long code);
 }

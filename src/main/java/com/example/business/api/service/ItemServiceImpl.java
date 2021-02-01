@@ -1,10 +1,7 @@
 package com.example.business.api.service;
 
 import com.example.business.api.dto.ItemDTO;
-import com.example.business.api.model.Item;
-import com.example.business.api.model.PriceReduction;
-import com.example.business.api.model.Supplier;
-import com.example.business.api.model.User;
+import com.example.business.api.model.*;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
 import com.example.business.api.repository.SupplierRepository;
@@ -154,6 +151,16 @@ public class ItemServiceImpl implements ItemService{
 
     public Iterable<ItemDTO> findCheapestItemPerSupplier() {
         return convertIterable2DTO(itemRepository.findCheapestItemPerSupplier());
+    }
+
+    public void deactivateItem(Long code) {
+        Optional<Item> item = itemRepository.findByCode(code);
+        if(!item.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("The item '%s' does not exist", code));
+        }
+        item.get().setState(ItemStateEnum.DISCONTINUED);
+        itemRepository.save(item.get());
     }
 
     public void mergeDTO2Entity(ItemDTO dto, Item entity, String mappingName) {

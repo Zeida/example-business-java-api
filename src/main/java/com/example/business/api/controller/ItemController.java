@@ -47,6 +47,13 @@ public class ItemController {
         itemService.updateItemWithCode(item, code);
     }
 
+    @PutMapping(path = "/items/deactivate/{code}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
+    public void deactivateItem(@PathVariable Long code) {
+        itemService.deactivateItem(code);
+    }
+
     @DeleteMapping(path = "/items")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
