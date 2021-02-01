@@ -175,6 +175,7 @@ public class ItemServiceTest {
         itemToAdd.setCode(1L);
         itemToAdd.setPrice(12.5);
         itemToAdd.setCreator(user);
+        itemToAdd.setDescription("Description");
 
         user.getItems().add(itemToAdd);
 
@@ -298,9 +299,13 @@ public class ItemServiceTest {
     public void updateItemWithExistingCodeAndNoIterablesAttributes() {
         ItemDTO itemToUpdate = new ItemDTO();
         itemToUpdate.setCode(1L);
+        itemToUpdate.setDescription("Description");
+        itemToUpdate.setPrice(12.3);
 
         Item actualItem = new Item();
         actualItem.setCode(1L);
+        actualItem.setDescription("Description");
+        actualItem.setPrice(12.3);
 
         Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.of(actualItem));
 

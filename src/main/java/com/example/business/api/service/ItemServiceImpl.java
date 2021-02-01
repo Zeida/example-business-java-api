@@ -71,7 +71,7 @@ public class ItemServiceImpl implements ItemService{
         if(dto.getCode() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a valid code");
 
-        if(dto.getDescription().isEmpty() || dto.getDescription() == null)
+        if(dto.getDescription() == null || dto.getDescription().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a non-empty description");
 
         if(itemRepository.findByCode(dto.getCode()).isPresent())
@@ -115,7 +115,7 @@ public class ItemServiceImpl implements ItemService{
                     String.format("The item '%s' does not exist", code));
         }
 
-        if(dto.getPrice().isNaN() || dto.getPrice() == null || dto.getPrice() <= 0)
+        if(dto.getPrice() == null || dto.getPrice().isNaN() || dto.getPrice() <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a valid price");
 
         if(dto.getCode() == null)
