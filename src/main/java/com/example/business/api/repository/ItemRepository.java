@@ -11,6 +11,11 @@ import java.util.Optional;
 public interface ItemRepository extends CrudRepository<Item, Long> {
     Optional<Item> findByCode(Long code);
 
-    @Query(value = "Select i from Item i")
+    @Query(nativeQuery = true, value = "" +
+            "select * from items where price " +
+            "in (select min(price) from item_supplier as it_s " +
+            "inner join suppliers as s on (it_s.supplier_id = s.id) " +
+            "inner join items as i on (i.id = it_s.item_id) " +
+            "group by s.id);")
     Iterable<Item> findCheapestItemPerSupplier();
 }
