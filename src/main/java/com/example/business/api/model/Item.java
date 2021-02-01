@@ -19,7 +19,7 @@ public class Item {
     @Column(name = "code", unique = true, nullable = false)
     private Long code;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Column(name = "price", nullable = false)

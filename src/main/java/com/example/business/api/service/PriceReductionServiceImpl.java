@@ -1,6 +1,5 @@
 package com.example.business.api.service;
 
-import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.PriceReductionDTO;
 import com.example.business.api.model.Item;
 import com.example.business.api.model.PriceReduction;

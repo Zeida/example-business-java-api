@@ -3,7 +3,6 @@ package com.example.business.api.service;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.SupplierDTO;
 import com.example.business.api.model.Item;
-import com.example.business.api.model.PriceReduction;
 import com.example.business.api.model.Supplier;
 import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
@@ -50,7 +49,10 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Transactional
     public void saveSupplier(SupplierDTO dto) {
-        if (supplierRepository.findByName(dto.getName()).isPresent())
+        if(dto.getName().isEmpty() || dto.getName() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A supplier must have a non-empty name");
+
+        if(supplierRepository.findByName(dto.getName()).isPresent())
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Invalid supplier, '%s' already exists", dto.getName()));
 
@@ -76,6 +78,9 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Transactional
     public void updateSupplierWithName(SupplierDTO dto, String name) {
+        if(name == null || name.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty name has been provided.");
+
         if (!name.equals(dto.getName()))
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Expected to update the supplier '%s'," +
@@ -86,6 +91,9 @@ public class SupplierServiceImpl implements SupplierService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("The supplier '%s' does not exist", name));
         }
+
+        if(dto.getName().isEmpty() || dto.getName() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A supplier must have a non-empty name");
 
         Supplier supplier = currentSupplier.get();
 
