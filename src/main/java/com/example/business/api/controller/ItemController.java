@@ -19,6 +19,13 @@ public class ItemController {
         return itemService.getAllItems();
     }
 
+    @GetMapping(path = "/items/cheapest")
+    @ResponseBody
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
+    public Iterable<ItemDTO> cheapestItemsBySupplier() {
+        return itemService.findCheapestItemPerSupplier();
+    }
+
     @PostMapping(path = "/items", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")

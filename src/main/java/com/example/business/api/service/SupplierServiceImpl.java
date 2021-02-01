@@ -96,6 +96,11 @@ public class SupplierServiceImpl implements SupplierService {
         }
     }
 
+    public Iterable<SupplierDTO> findSuppliersWhoseItemsHasPriceReductions() {
+        Iterable<Supplier> suppliers = supplierRepository.findSuppliersWhoseItemsHasPriceReductions();
+        return convertIterable2DTO(suppliers);
+    }
+
     public void mergeDTO2Entity(SupplierDTO dto, Supplier entity, String mappingName) {
         if(entity != null && dto != null)
             modelMapper.map(dto, entity, mappingName);

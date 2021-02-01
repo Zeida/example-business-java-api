@@ -134,6 +134,10 @@ public class ItemServiceImpl implements ItemService{
         itemRepository.delete(item.get());
     }
 
+    public Iterable<ItemDTO> findCheapestItemPerSupplier() {
+        return convertIterable2DTO(itemRepository.findCheapestItemPerSupplier());
+    }
+
     public void mergeDTO2Entity(ItemDTO dto, Item entity, String mappingName) {
         if(entity != null && dto != null)
             modelMapper.map(dto, entity, mappingName);

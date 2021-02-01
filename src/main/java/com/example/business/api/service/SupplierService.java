@@ -8,4 +8,5 @@ public interface SupplierService extends BaseService<Supplier, SupplierDTO> {
     void saveSupplier(SupplierDTO dto);
     SupplierDTO getSupplierByName(String name);
     void updateSupplierWithName(SupplierDTO dto, String name);
+    Iterable<SupplierDTO> findSuppliersWhoseItemsHasPriceReductions();
 }

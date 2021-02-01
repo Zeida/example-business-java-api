@@ -19,6 +19,13 @@ public class SupplierController {
         return supplierService.getAllSuppliers();
     }
 
+    @GetMapping(path = "/suppliers/with-items/with-reductions")
+    @ResponseBody
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
+    public Iterable<SupplierDTO> suppliersWhoseItemsHasReductions() {
+        return supplierService.findSuppliersWhoseItemsHasPriceReductions();
+    }
+
     @PostMapping(path = "/suppliers", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")

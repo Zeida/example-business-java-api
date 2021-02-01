@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -102,7 +103,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public void mergeDTO2Entity(UserDTO dto, User entity, String mappingName) {
-
+        throw new NotImplementedException();
     }
 
     public UserDTO convert2DTO(User entity) {
