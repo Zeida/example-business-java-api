@@ -92,9 +92,6 @@ public class SupplierServiceImpl implements SupplierService {
                     String.format("The supplier '%s' does not exist", name));
         }
 
-        if(dto.getName().isEmpty() || dto.getName() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A supplier must have a non-empty name");
-
         Supplier supplier = currentSupplier.get();
 
         mergeDTO2Entity(dto, supplier, "UpdateSupplierMapping");

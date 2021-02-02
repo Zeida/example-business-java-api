@@ -94,29 +94,23 @@ public class PriceReductionServiceImpl implements PriceReductionService {
                             " price reduction '%s' given.", code, dto.getCode()));
         }
 
-        if(dto.getAmountDeducted() == null || dto.getAmountDeducted() <= 0)
+        if(dto.getAmountDeducted() != null && dto.getAmountDeducted() <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "A price reduction must have the amount deducted > 0");
-
-        if(dto.getItem() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "A price reduction must me applied to an item.");
-
-        if(dto.getEndDate() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "A price reduction must have an end date.");
-
-        LocalDateTime endDate = dto.getEndDate();
-        LocalDateTime startDate = dto.getStartDate() == null ? LocalDateTime.now() : dto.getStartDate();
-
-        if(endDate.isBefore(startDate))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "End date should be a date after start date");
 
         Optional<PriceReduction> originalPriceReduction = priceReductionRepository.findByCode(code);
         if(!originalPriceReduction.isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("The price reduction '%s' does not exist", code));
+
+        LocalDateTime endDate = dto.getEndDate() == null
+                ? originalPriceReduction.get().getEndDate() : dto.getEndDate();
+        LocalDateTime startDate = dto.getStartDate() == null
+                ? LocalDateTime.now() : dto.getStartDate();
+
+        if(endDate.isBefore(startDate))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "End date should be a date after start date");
 
         Optional<Item> item = itemRepository.findByCode(dto.getItem().getCode());
         if(item.isPresent()) {

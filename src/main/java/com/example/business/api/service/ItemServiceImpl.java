@@ -62,7 +62,7 @@ public class ItemServiceImpl implements ItemService{
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "This action cannot be done with the current user");
 
-        if(dto.getPrice().isNaN() || dto.getPrice() == null || dto.getPrice() <= 0)
+        if(dto.getPrice() == null || dto.getPrice().isNaN() || dto.getPrice() <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a valid price");
 
         if(dto.getCode() == null)
@@ -107,36 +107,38 @@ public class ItemServiceImpl implements ItemService{
                     String.format("Expected to update the item '%s', item '%s' given.", code, dto.getCode()));
         }
 
-        if(!itemRepository.findByCode(code).isPresent()) {
+        Optional<Item> existingItem = itemRepository.findByCode(code);
+
+        if(!existingItem.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("The item '%s' does not exist", code));
         }
 
-        if(dto.getPrice() == null || dto.getPrice().isNaN() || dto.getPrice() <= 0)
+        if(existingItem.get().getState() == ItemStateEnum.DISCONTINUED)
+            throw  new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("The item '%s' has %s state, it cannot be modified.",
+                            code, ItemStateEnum.DISCONTINUED.name()));
+
+        if(dto.getPrice() != null && (dto.getPrice().isNaN() || dto.getPrice() <= 0))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a valid price");
 
-        if(dto.getCode() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a valid code");
-
-        if(dto.getDescription().isEmpty() || dto.getDescription() == null)
+        if(dto.getDescription() != null && dto.getDescription().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An item must have a non-empty description");
 
-        Item item = itemRepository.findByCode(code).get();
-
-        mergeDTO2Entity(dto, item, "UpdateItemMapping");
+        mergeDTO2Entity(dto, existingItem.get(), "UpdateItemMapping");
 
         if(dto.getSuppliers() != null) {
             Set<Supplier> suppliers = StreamSupport.stream(supplierService.convertIterable2Entity(dto.getSuppliers())
                     .spliterator(), true)
                     .collect(Collectors.toSet());
-            itemSuppliersProcessing(item, suppliers);
+            itemSuppliersProcessing(existingItem.get(), suppliers);
         }
 
         if(dto.getPriceReductions() != null) {
             Set<PriceReduction> priceReductions = StreamSupport.stream(priceReductionService.convertIterable2Entity(dto.getPriceReductions())
                     .spliterator(), true)
                     .collect(Collectors.toSet());
-            itemPriceReductionsProcessing(item, priceReductions);
+            itemPriceReductionsProcessing(existingItem.get(), priceReductions);
         }
     }
 

@@ -10,6 +10,7 @@ import com.example.business.api.repository.UserRepository;
 import com.example.business.api.security.AuthenticationFacade;
 import com.example.business.api.service.ItemServiceImpl;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -47,94 +48,114 @@ public class ItemServiceTest {
     @Mock
     private AuthenticationFacade authenticationFacade;
 
+    private ItemDTO testItemDTO;
+
+    private Item testItem;
+    private User testUser;
+
+    private Authentication auth;
+
+    private final Long CODE = 1L;
+    private final Double PRICE = 12.5;
+    private final String DESC = "Description";
+
+    @Before
+    public void setupTest() {
+        testItemDTO = new ItemDTO();
+        UserDTO testUserDTO = new UserDTO();
+
+        Long ID = 1L;
+        testItemDTO.setId(ID);
+        testItemDTO.setCode(CODE);
+        testItemDTO.setPrice(PRICE);
+        testItemDTO.setDescription(DESC);
+
+        testUserDTO.setUsername("user");
+        testUserDTO.setPassword("hashed-password-goes-here");
+
+        Set<ItemDTO> itemDTOS = new HashSet<>();
+        itemDTOS.add(testItemDTO);
+
+        testItemDTO.setCreator(testUserDTO);
+        testUserDTO.setItems(itemDTOS);
+
+        testItem = new Item();
+        testUser = new User();
+
+        testItem.setId(ID);
+        testItem.setCode(CODE);
+        testItem.setPrice(PRICE);
+        testItem.setDescription(DESC);
+
+        testUser.setUsername("user");
+        testUser.setPassword("hashed-password-goes-here");
+
+        Set<Item> items = new HashSet<>();
+        items.add(testItem);
+
+        testItem.setCreator(testUser);
+        testUser.setItems(items);
+
+        auth = new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return null;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return false;
+            }
+
+            @Override
+            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return testUser.getUsername();
+            }
+        };
+    }
+
     @Test
     public void findAllItemsWithOneItem() {
         Set<Item> items = new HashSet<>();
         Set<ItemDTO> itemsDTO = new HashSet<>();
 
-        User user = new User();
-        user.setId(1L);
-
-        Item item = new Item();
-        item.setId(1L);
-
-        items.add(item);
-
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-
-        ItemDTO itemDTO = new ItemDTO();
-        itemDTO.setId(item.getId());
-
-        itemsDTO.add(itemDTO);
+        itemsDTO.add(testItemDTO);
+        items.add(testItem);
 
         Mockito.when(itemRepository.findAll()).thenReturn(items);
         Mockito.doReturn(itemsDTO).when(itemService).convertIterable2DTO(items);
 
         Iterable<ItemDTO> allItems = itemService.getAllItems();
-        Assert.assertEquals(new Long(1L), allItems.iterator().next().getId());
-        Mockito.verify(itemService, Mockito.times(1)).getAllItems();
-    }
-
-    @Test
-    public void findAllItemsWith3Items() {
-        Set<Item> items = new HashSet<>();
-        Set<ItemDTO> itemsDTO = new HashSet<>();
-
-        User user = new User();
-        user.setId(1L);
-
-        Item item1 = new Item();
-        item1.setId(1L);
-
-        Item item2 = new Item();
-        item2.setId(2L);
-
-        Item item3 = new Item();
-        item3.setId(3L);
-
-        items.add(item1);
-        items.add(item2);
-        items.add(item3);
-
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-
-        ItemDTO itemDTO1 = new ItemDTO();
-        itemDTO1.setId(item1.getId());
-
-        ItemDTO itemDTO2 = new ItemDTO();
-        itemDTO2.setId(item2.getId());
-
-        ItemDTO itemDTO3 = new ItemDTO();
-        itemDTO3.setId(item3.getId());
-
-        itemsDTO.add(itemDTO1);
-        itemsDTO.add(itemDTO2);
-        itemsDTO.add(itemDTO3);
-
-        Mockito.when(itemRepository.findAll()).thenReturn(items);
-        Mockito.doReturn(itemsDTO).when(itemService).convertIterable2DTO(items);
-
-        Iterable<ItemDTO> allItems = itemService.getAllItems();
-
-        allItems.forEach(givenItem -> Assert.assertTrue(itemsDTO.contains(givenItem)));
+        Assert.assertEquals(testItem.getCode(), allItems.iterator().next().getCode());
         Mockito.verify(itemService, Mockito.times(1)).getAllItems();
     }
 
     @Test
     public void getItemByExistingCode() {
         Long code = 1L;
-        Item itemFromDB = new Item();
-        itemFromDB.setId(1L);
-        itemFromDB.setCode(code);
 
-        ItemDTO itemDTO = new ItemDTO();
-        itemDTO.setId(itemFromDB.getId());
-        itemDTO.setCode(itemFromDB.getCode());
-
-        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(itemFromDB));
-        Mockito.doReturn(itemDTO).when(itemService).convert2DTO(itemFromDB);
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
+        Mockito.doReturn(testItemDTO).when(itemService).convert2DTO(testItem);
 
         Assert.assertEquals(code, itemService.getItemByCode(code).getCode());
         Mockito.verify(itemService, Mockito.times(1)).getItemByCode(code);
@@ -143,13 +164,6 @@ public class ItemServiceTest {
     @Test
     public void getItemWithNoExistingCode() {
         Long code = 2L;
-        Item itemFromDB = new Item();
-        itemFromDB.setId(1L);
-        itemFromDB.setCode(1L);
-
-        ItemDTO itemDTO = new ItemDTO();
-        itemDTO.setId(itemFromDB.getId());
-        itemDTO.setCode(itemFromDB.getCode());
 
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.empty());
 
@@ -166,124 +180,88 @@ public class ItemServiceTest {
 
     @Test
     public void addNewItem() {
-        UserDTO user = new UserDTO();
-        user.setUsername("user");
-        user.setPassword("hashed-password-goes-here");
-        user.setItems(new HashSet<>());
-
-        ItemDTO itemToAdd = new ItemDTO();
-        itemToAdd.setCode(1L);
-        itemToAdd.setPrice(12.5);
-        itemToAdd.setCreator(user);
-        itemToAdd.setDescription("Description");
-
-        user.getItems().add(itemToAdd);
-
-        User actualUser = new User(1L, "user", "hashed-password-goes-here", new HashSet<>());
-
-        Item actualItem = new Item(1L, 1L, null, 12.5,
-                ItemStateEnum.ACTIVE, null, null, LocalDateTime.now(), actualUser);
-
-        actualUser.getItems().add(actualItem);
-
         Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.empty());
-        Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(actualUser));
-        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(new Authentication() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return null;
-            }
+        Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(testUser));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
 
-            @Override
-            public Object getCredentials() {
-                return null;
-            }
+        itemService.saveItem(testItemDTO);
 
-            @Override
-            public Object getDetails() {
-                return null;
-            }
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(testItemDTO);
+    }
 
-            @Override
-            public Object getPrincipal() {
-                return null;
-            }
+    @Test
+    public void addNewItemButDescriptionIsMissing() {
+        testItemDTO.setDescription(null);
 
-            @Override
-            public boolean isAuthenticated() {
-                return false;
-            }
+        Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(testUser));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
 
-            @Override
-            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.saveItem(testItemDTO));
 
-            }
+        String expectedMessage = String.format("%s \"An item must have a non-empty description\"",
+                HttpStatus.BAD_REQUEST.toString());
 
-            @Override
-            public String getName() {
-                return actualUser.getUsername();
-            }
-        });
+        String actualMessage = exception.getMessage();
 
-        itemService.saveItem(itemToAdd);
+        Assert.assertEquals(expectedMessage, actualMessage);
 
-        Mockito.verify(itemService, Mockito.times(1)).saveItem(itemToAdd);
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(testItemDTO);
+
+        testItemDTO.setDescription(DESC);
+    }
+
+    @Test
+    public void addNewItemButPriceIsMissing() {
+        testItemDTO.setPrice(null);
+
+        Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(testUser));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.saveItem(testItemDTO));
+
+        String expectedMessage = String.format("%s \"An item must have a valid price\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(testItemDTO);
+
+        testItemDTO.setPrice(PRICE);
+    }
+
+    @Test
+    public void addNewItemButCodeIsMissing() {
+        testItemDTO.setCode(null);
+
+        Mockito.when(userRepository.findByUsername("user")).thenReturn(Optional.of(testUser));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.saveItem(testItemDTO));
+
+        String expectedMessage = String.format("%s \"An item must have a valid code\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(testItemDTO);
+
+        testItemDTO.setCode(CODE);
     }
 
     @Test
     public void addNewItemButUserDoestNotExist() {
-        UserDTO user = new UserDTO();
-        user.setUsername("user");
-        user.setPassword("hashed-password-goes-here");
-        user.setItems(new HashSet<>());
-
-        ItemDTO itemToAdd = new ItemDTO();
-        itemToAdd.setCode(1L);
-        itemToAdd.setPrice(12.5);
-        itemToAdd.setCreator(user);
-
-        Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.empty());
-        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(new Authentication() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return null;
-            }
-
-            @Override
-            public Object getCredentials() {
-                return null;
-            }
-
-            @Override
-            public Object getDetails() {
-                return null;
-            }
-
-            @Override
-            public Object getPrincipal() {
-                return null;
-            }
-
-            @Override
-            public boolean isAuthenticated() {
-                return false;
-            }
-
-            @Override
-            public void setAuthenticated(boolean b) throws IllegalArgumentException {
-
-            }
-
-            @Override
-            public String getName() {
-                return user.getUsername();
-            }
-        });
-
-        user.getItems().add(itemToAdd);
+        Mockito.when(userRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.empty());
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
-                () -> this.itemService.saveItem(itemToAdd));
+                () -> this.itemService.saveItem(testItemDTO));
 
         String expectedMessage = String.format("%s \"This action cannot be done with the current user\"",
                 HttpStatus.FORBIDDEN.toString());
@@ -292,80 +270,120 @@ public class ItemServiceTest {
 
         Assert.assertEquals(expectedMessage, actualMessage);
 
-        Mockito.verify(itemService, Mockito.times(1)).saveItem(itemToAdd);
+        Mockito.verify(itemService, Mockito.times(1)).saveItem(testItemDTO);
     }
 
     @Test
-    public void updateItemWithExistingCodeAndNoIterablesAttributes() {
-        ItemDTO itemToUpdate = new ItemDTO();
-        itemToUpdate.setCode(1L);
-        itemToUpdate.setDescription("Description");
-        itemToUpdate.setPrice(12.3);
+    public void updateItemWithExistingCode() {
+        Long code = 1L;
 
-        Item actualItem = new Item();
-        actualItem.setCode(1L);
-        actualItem.setDescription("Description");
-        actualItem.setPrice(12.3);
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
 
-        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.of(actualItem));
+        itemService.updateItemWithCode(testItemDTO, code);
 
-        itemService.updateItemWithCode(itemToUpdate, 1L);
-
-        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(itemToUpdate, 1L);
+        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(testItemDTO, code);
     }
 
     @Test
-    public void updateItemWithNoExistingCodeAndNoIterablesAttributes() {
-        ItemDTO itemToUpdate = new ItemDTO();
-        itemToUpdate.setCode(1L);
+    public void updateItemWithNoExistingCode() {
+        Long code = 2L;
 
-        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.empty());
+        testItemDTO.setCode(code);
+
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.empty());
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
-                () -> this.itemService.updateItemWithCode(itemToUpdate, 1L));
+                () -> this.itemService.updateItemWithCode(testItemDTO, code));
 
         String expectedMessage = String.format("%s \"The item '%s' does not exist\"",
-                HttpStatus.NOT_FOUND.toString(), itemToUpdate.getCode());
+                HttpStatus.NOT_FOUND.toString(), testItemDTO.getCode());
 
         String actualMessage = exception.getMessage();
 
         Assert.assertEquals(expectedMessage, actualMessage);
 
-        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(itemToUpdate, 1L);
+        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(testItemDTO, code);
+
+        testItemDTO.setCode(1L);
+    }
+
+    @Test
+    public void updateItemWithEmptyDescription() {
+        Long code = 1L;
+
+        testItemDTO.setDescription("");
+
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.updateItemWithCode(testItemDTO, code));
+
+        String expectedMessage = String.format("%s \"An item must have a non-empty description\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(testItemDTO, code);
+
+        testItemDTO.setDescription(DESC);
+    }
+
+    @Test
+    public void updateItemWithInvalidPrice() {
+        Long code = 1L;
+
+        testItemDTO.setPrice(0.);
+
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.itemService.updateItemWithCode(testItemDTO, code));
+
+        String expectedMessage = String.format("%s \"An item must have a valid price\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(itemService, Mockito.times(1)).updateItemWithCode(testItemDTO, code);
+
+        testItemDTO.setPrice(PRICE);
     }
 
     @Test
     public void deleteExistingItem() {
-        ItemDTO itemToDelete = new ItemDTO();
-        itemToDelete.setCode(1L);
+        Long code = 1L;
 
-        Item actualItem = new Item();
-        actualItem.setCode(1L);
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
 
-        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.of(actualItem));
+        itemService.deleteItem(testItemDTO);
 
-        itemService.deleteItem(itemToDelete);
-
-        Mockito.verify(itemService, Mockito.times(1)).deleteItem(itemToDelete);
+        Mockito.verify(itemService, Mockito.times(1)).deleteItem(testItemDTO);
     }
 
     @Test
     public void deleteNoExistingItem() {
-        ItemDTO itemToDelete = new ItemDTO();
-        itemToDelete.setCode(1L);
+        Long code = 2L;
 
-        Mockito.when(itemRepository.findByCode(1L)).thenReturn(Optional.empty());
+        testItemDTO.setCode(code);
+
+        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.empty());
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
-                () -> this.itemService.deleteItem(itemToDelete));
+                () -> this.itemService.deleteItem(testItemDTO));
 
         String expectedMessage = String.format("%s \"The item '%s' does not exist\"",
-                HttpStatus.NOT_FOUND.toString(), itemToDelete.getCode());
+                HttpStatus.NOT_FOUND.toString(), testItemDTO.getCode());
 
         String actualMessage = exception.getMessage();
 
         Assert.assertEquals(expectedMessage, actualMessage);
 
-        Mockito.verify(itemService, Mockito.times(1)).deleteItem(itemToDelete);
+        Mockito.verify(itemService, Mockito.times(1)).deleteItem(testItemDTO);
+
+        testItemDTO.setCode(CODE);
     }
 }
