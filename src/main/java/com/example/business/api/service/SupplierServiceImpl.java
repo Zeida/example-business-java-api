@@ -48,7 +48,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Transactional
-    public void saveSupplier(SupplierDTO dto) {
+    public Void saveSupplier(SupplierDTO dto) {
         if(dto.getName() == null || dto.getName().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A supplier must have a non-empty name");
 
@@ -64,6 +64,7 @@ public class SupplierServiceImpl implements SupplierService {
 
         if(supplier.getItems() != null)
             supplierItemsProcessing(supplier, new HashSet<>(dto.getItems()));
+        return null;
     }
 
     public SupplierDTO getSupplierByName(String name) {
@@ -77,7 +78,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Transactional
-    public void updateSupplierWithName(SupplierDTO dto, String name) {
+    public Void updateSupplierWithName(SupplierDTO dto, String name) {
         if(name == null || name.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty name has been provided.");
 
@@ -99,6 +100,7 @@ public class SupplierServiceImpl implements SupplierService {
         if(dto.getItems() != null) {
             supplierItemsProcessing(supplier, dto.getItems());
         }
+        return null;
     }
 
     public Iterable<SupplierDTO> findSuppliersWhoseItemsHasPriceReductions() {

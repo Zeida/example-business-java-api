@@ -55,7 +55,7 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Transactional
-    public void saveItem(ItemDTO dto) {
+    public Void saveItem(ItemDTO dto) {
         Optional<User> creator = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
 
         if(!creator.isPresent())
@@ -88,6 +88,7 @@ public class ItemServiceImpl implements ItemService{
 
         if(item.getPriceReductions() != null)
             itemPriceReductionsProcessing(item, new HashSet<>(item.getPriceReductions()));
+        return null;
     }
 
     public ItemDTO getItemByCode(Long code) {
@@ -101,7 +102,7 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Transactional
-    public void updateItemWithCode(ItemDTO dto, Long code) {
+    public Void updateItemWithCode(ItemDTO dto, Long code) {
         if(!dto.getCode().equals(code)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Expected to update the item '%s', item '%s' given.", code, dto.getCode()));
@@ -140,22 +141,24 @@ public class ItemServiceImpl implements ItemService{
                     .collect(Collectors.toSet());
             itemPriceReductionsProcessing(existingItem.get(), priceReductions);
         }
+        return null;
     }
 
-    public void deleteItem(ItemDTO dto) {
+    public Void deleteItem(ItemDTO dto) {
         Optional<Item> item = itemRepository.findByCode(dto.getCode());
         if(!item.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("The item '%s' does not exist", dto.getCode()));
         }
         itemRepository.delete(item.get());
+        return null;
     }
 
     public Iterable<ItemDTO> findCheapestItemPerSupplier() {
         return convertIterable2DTO(itemRepository.findCheapestItemPerSupplier());
     }
 
-    public void deactivateItem(Long code) {
+    public Void deactivateItem(Long code) {
         Optional<Item> item = itemRepository.findByCode(code);
         if(!item.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -163,6 +166,7 @@ public class ItemServiceImpl implements ItemService{
         }
         item.get().setState(ItemStateEnum.DISCONTINUED);
         itemRepository.save(item.get());
+        return null;
     }
 
     public void mergeDTO2Entity(ItemDTO dto, Item entity, String mappingName) {

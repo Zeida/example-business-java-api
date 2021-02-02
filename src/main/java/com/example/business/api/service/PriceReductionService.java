@@ -5,7 +5,7 @@ import com.example.business.api.model.PriceReduction;
 
 public interface PriceReductionService extends BaseService<PriceReduction, PriceReductionDTO> {
     Iterable<PriceReductionDTO> getAllPriceReductions();
-    void savePriceReduction(PriceReductionDTO dto);
+    Void savePriceReduction(PriceReductionDTO dto);
     PriceReductionDTO getPriceReductionFromCode(Long code);
-    void updatePriceReductionWithCode(PriceReductionDTO dto, Long code);
+    Void updatePriceReductionWithCode(PriceReductionDTO dto, Long code);
 }

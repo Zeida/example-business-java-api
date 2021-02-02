@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.util.Objects;
 
 @SpringBootApplication
+@EnableAsync
 public class ApiApplication {
 
 	public static void main(String[] args) {
@@ -55,9 +57,8 @@ public class ApiApplication {
 					mapper.skip(Supplier::setItems);
 		});
 
-		modelMapper.typeMap(SupplierDTO.class, Supplier.class, "SaveSupplierMapping").addMappings(mapper -> {
-
-		});
+		modelMapper.typeMap(SupplierDTO.class, Supplier.class, "SaveSupplierMapping")
+				.addMappings(mapper -> {});
 
 		modelMapper.typeMap(PriceReductionDTO.class, PriceReduction.class, "UpdatePriceReductionMapping")
 				.setPropertyCondition(Conditions.isNotNull());

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
 @RestController
 public class UserController {
@@ -13,28 +14,28 @@ public class UserController {
     private UserService userService;
 
     @PostMapping(path = "/login", consumes = "application/json")
-    public UserDTO login(@RequestBody UserDTO user) {
-        return userService.login(user.getUsername(), user.getPassword());
+    public WebAsyncTask<UserDTO> login(@RequestBody UserDTO user) {
+        return new WebAsyncTask<>(() -> userService.login(user.getUsername(), user.getPassword()));
     }
 
     @GetMapping(path = "/users")
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Iterable<UserDTO> allUsers() {
-        return userService.findAllUsers();
+    public WebAsyncTask<Iterable<UserDTO>> allUsers() {
+        return new WebAsyncTask<>(() -> userService.findAllUsers());
     }
 
     @PostMapping(path = "/users")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addUser(@RequestBody UserDTO user) {
-        userService.saveUser(user);
+    public WebAsyncTask<Void> addUser(@RequestBody UserDTO user) {
+        return new WebAsyncTask<>(() -> userService.saveUser(user));
     }
 
     @DeleteMapping(path = "/users")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void removeUser(@RequestBody UserDTO user) {
-        userService.removeUser(user);
+    public WebAsyncTask<Void> removeUser(@RequestBody UserDTO user) {
+        return new WebAsyncTask<>(() -> userService.removeUser(user));
     }
 }

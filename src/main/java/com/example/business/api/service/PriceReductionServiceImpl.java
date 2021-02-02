@@ -36,7 +36,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
     }
 
     @Transactional
-    public void savePriceReduction(PriceReductionDTO dto) {
+    public Void savePriceReduction(PriceReductionDTO dto) {
         if(dto.getAmountDeducted() == null || dto.getAmountDeducted() <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "A price reduction must have the amount deducted > 0");
@@ -75,6 +75,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
                     String.format("Invalid item, '%s' does not exists", dto.getItem().getCode()));
         }
 
+        return null;
     }
 
     public PriceReductionDTO getPriceReductionFromCode(Long code) {
@@ -87,7 +88,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
                 String.format("The price reduction '%s' does not exist", code));
     }
 
-    public void updatePriceReductionWithCode(PriceReductionDTO dto, Long code) {
+    public Void updatePriceReductionWithCode(PriceReductionDTO dto, Long code) {
         if(!dto.getCode().equals(code)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Expected to update the price reduction '%s'," +
@@ -128,6 +129,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
 
             priceReductionRepository.save(priceReduction);
         }
+        return null;
     }
 
     public void mergeDTO2Entity(PriceReductionDTO dto, PriceReduction entity, String mappingName) {

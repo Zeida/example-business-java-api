@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
         return convertIterable2DTO(users);
     }
 
-    public void saveUser(UserDTO dto) {
+    public Void saveUser(UserDTO dto) {
         if(userRepository.findByUsername(dto.getUsername()).isPresent())
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Invalid username, '%s' already exists", dto.getUsername()));
@@ -70,10 +70,11 @@ public class UserServiceImpl implements UserService {
 
             userRepository.save(user);
         }
+        return null;
     }
 
     @Transactional
-    public void removeUser(UserDTO dto) {
+    public Void removeUser(UserDTO dto) {
         Optional<User> user = userRepository.findByUsername(dto.getUsername());
         if(!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");
@@ -85,6 +86,7 @@ public class UserServiceImpl implements UserService {
         }
         user.get().setItems(null);
         userRepository.delete(user.get());
+        return null;
     }
 
     private String getJWTTokenByUser(UserDTO user) {

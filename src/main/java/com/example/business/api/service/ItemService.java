@@ -5,10 +5,10 @@ import com.example.business.api.model.Item;
 
 public interface ItemService extends BaseService<Item, ItemDTO>{
     Iterable<ItemDTO> getAllItems();
-    void saveItem(ItemDTO dto);
+    Void saveItem(ItemDTO dto);
     ItemDTO getItemByCode(Long code);
-    void updateItemWithCode(ItemDTO dto, Long code);
-    void deleteItem(ItemDTO dto);
+    Void updateItemWithCode(ItemDTO dto, Long code);
+    Void deleteItem(ItemDTO dto);
     Iterable<ItemDTO> findCheapestItemPerSupplier();
-    void deactivateItem(Long code);
+    Void deactivateItem(Long code);
 }

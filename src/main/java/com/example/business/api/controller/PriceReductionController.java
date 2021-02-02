@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
 @RestController
 public class PriceReductionController {
@@ -15,28 +16,28 @@ public class PriceReductionController {
     @GetMapping(path = "/price-reductions")
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public Iterable<PriceReductionDTO> allPriceReductions() {
-        return priceReductionService.getAllPriceReductions();
+    public WebAsyncTask<Iterable<PriceReductionDTO>> allPriceReductions() {
+        return new WebAsyncTask<>(() -> priceReductionService.getAllPriceReductions());
     }
 
     @PostMapping(path = "/price-reductions", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
-    public void addPriceReduction(@RequestBody PriceReductionDTO priceReduction) {
-        priceReductionService.savePriceReduction(priceReduction);
+    public WebAsyncTask<Void> addPriceReduction(@RequestBody PriceReductionDTO priceReduction) {
+        return new WebAsyncTask<>(() -> priceReductionService.savePriceReduction(priceReduction));
     }
 
     @GetMapping(path = "/price-reductions/{code}")
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public PriceReductionDTO getPriceReductionFromCode(@PathVariable Long code) {
-        return priceReductionService.getPriceReductionFromCode(code);
+    public WebAsyncTask<PriceReductionDTO> getPriceReductionFromCode(@PathVariable Long code) {
+        return new WebAsyncTask<>(() -> priceReductionService.getPriceReductionFromCode(code));
     }
 
     @PutMapping(path = "/price-reductions/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public void updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) {
-        priceReductionService.updatePriceReductionWithCode(priceReduction, code);
+    public WebAsyncTask<Void> updatePriceReductionByCode(@PathVariable Long code, @RequestBody PriceReductionDTO priceReduction) {
+        return new WebAsyncTask<>(() -> priceReductionService.updatePriceReductionWithCode(priceReduction, code));
     }
 }
