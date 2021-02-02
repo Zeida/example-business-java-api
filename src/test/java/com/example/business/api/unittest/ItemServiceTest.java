@@ -3,14 +3,13 @@ package com.example.business.api.unittest;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.Item;
-import com.example.business.api.model.ItemStateEnum;
 import com.example.business.api.model.User;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.UserRepository;
 import com.example.business.api.security.AuthenticationFacade;
 import com.example.business.api.service.ItemServiceImpl;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -48,19 +46,19 @@ public class ItemServiceTest {
     @Mock
     private AuthenticationFacade authenticationFacade;
 
-    private ItemDTO testItemDTO;
+    private static ItemDTO testItemDTO;
 
-    private Item testItem;
-    private User testUser;
+    private static Item testItem;
+    private static User testUser;
 
-    private Authentication auth;
+    private static Authentication auth;
 
-    private final Long CODE = 1L;
-    private final Double PRICE = 12.5;
-    private final String DESC = "Description";
+    private static final Long CODE = 1L;
+    private static final Double PRICE = 12.5;
+    private static final String DESC = "Description";
 
-    @Before
-    public void setupTest() {
+    @BeforeClass
+    public static void setupTest() {
         testItemDTO = new ItemDTO();
         UserDTO testUserDTO = new UserDTO();
 
