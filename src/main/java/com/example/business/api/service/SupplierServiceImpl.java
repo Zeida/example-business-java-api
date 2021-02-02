@@ -49,7 +49,7 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Transactional
     public void saveSupplier(SupplierDTO dto) {
-        if(dto.getName().isEmpty() || dto.getName() == null)
+        if(dto.getName() == null || dto.getName().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A supplier must have a non-empty name");
 
         if(supplierRepository.findByName(dto.getName()).isPresent())
