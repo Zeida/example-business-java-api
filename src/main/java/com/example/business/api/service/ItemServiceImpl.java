@@ -1,11 +1,9 @@
 package com.example.business.api.service;
 
+import com.example.business.api.dto.DeactivationReasonDTO;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.model.*;
-import com.example.business.api.repository.ItemRepository;
-import com.example.business.api.repository.PriceReductionRepository;
-import com.example.business.api.repository.SupplierRepository;
-import com.example.business.api.repository.UserRepository;
+import com.example.business.api.repository.*;
 import com.example.business.api.security.AuthenticationFacade;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +36,9 @@ public class ItemServiceImpl implements ItemService{
     private UserRepository userRepository;
 
     @Autowired
+    private DeactivationReasonRepository deactivationReasonRepository;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -45,6 +46,9 @@ public class ItemServiceImpl implements ItemService{
 
     @Autowired
     private PriceReductionService priceReductionService;
+
+    @Autowired
+    private DeactivationReasonService deactivationReasonService;
 
     @Autowired
     private AuthenticationFacade authenticationFacade;
@@ -158,13 +162,29 @@ public class ItemServiceImpl implements ItemService{
         return convertIterable2DTO(itemRepository.findCheapestItemPerSupplier());
     }
 
-    public Void deactivateItem(Long code) {
+    public Void deactivateItem(DeactivationReasonDTO dto, Long code) {
+        Optional<User> creator = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
+
+        if(!creator.isPresent())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This action cannot be done with the current user");
+
         Optional<Item> item = itemRepository.findByCode(code);
         if(!item.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("The item '%s' does not exist", code));
         }
-        item.get().setState(ItemStateEnum.DISCONTINUED);
+
+        Item existingItem = item.get();
+        existingItem.setState(ItemStateEnum.DISCONTINUED);
+
+        DeactivationReason deactivationReason = deactivationReasonService.convert2Entity(dto);
+
+        deactivationReason.setItem(existingItem);
+        deactivationReason.setCreator(creator.get());
+        deactivationReasonRepository.save(deactivationReason);
+        existingItem.addDeactivationReason(deactivationReason);
+
         itemRepository.save(item.get());
         return null;
     }

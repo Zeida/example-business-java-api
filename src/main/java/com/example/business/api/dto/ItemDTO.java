@@ -24,6 +24,8 @@ public class ItemDTO implements Serializable {
 
     private List<PriceReductionDTO> priceReductions;
 
+    private List<DeactivationReasonDTO> deactivationReasons;
+
     private LocalDateTime creationDate;
 
     private UserDTO creator;
@@ -114,5 +116,13 @@ public class ItemDTO implements Serializable {
         }
         priceReduction.setItem(this);
         priceReductions.add(priceReduction);
+    }
+
+    public void addDeactivationReason(DeactivationReasonDTO deactivationReason) {
+        if(deactivationReasons == null) {
+            deactivationReasons = new ArrayList<>();
+        }
+        deactivationReason.setItem(this);
+        deactivationReasons.add(deactivationReason);
     }
 }

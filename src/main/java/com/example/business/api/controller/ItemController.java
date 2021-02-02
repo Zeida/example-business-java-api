@@ -1,5 +1,6 @@
 package com.example.business.api.controller;
 
+import com.example.business.api.dto.DeactivationReasonDTO;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +52,8 @@ public class ItemController {
     @PutMapping(path = "/items/deactivate/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
-    public WebAsyncTask<Void> deactivateItem(@PathVariable Long code) {
-        return new WebAsyncTask<>(() -> itemService.deactivateItem(code));
+    public WebAsyncTask<Void> deactivateItem(@PathVariable Long code, @RequestBody DeactivationReasonDTO deactivationReason) {
+        return new WebAsyncTask<>(() -> itemService.deactivateItem(deactivationReason, code));
     }
 
     @DeleteMapping(path = "/items")

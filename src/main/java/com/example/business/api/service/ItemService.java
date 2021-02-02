@@ -1,5 +1,6 @@
 package com.example.business.api.service;
 
+import com.example.business.api.dto.DeactivationReasonDTO;
 import com.example.business.api.dto.ItemDTO;
 import com.example.business.api.model.Item;
 
@@ -10,5 +11,5 @@ public interface ItemService extends BaseService<Item, ItemDTO>{
     Void updateItemWithCode(ItemDTO dto, Long code);
     Void deleteItem(ItemDTO dto);
     Iterable<ItemDTO> findCheapestItemPerSupplier();
-    Void deactivateItem(Long code);
+    Void deactivateItem(DeactivationReasonDTO dto, Long code);
 }

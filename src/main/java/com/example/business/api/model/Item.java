@@ -40,6 +40,9 @@ public class Item {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private List<PriceReduction> priceReductions;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "item", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<DeactivationReason> deactivationReasons;
+
     @Column(name = "creation_date", columnDefinition = "timestamp default current_timestamp()")
     private LocalDateTime creationDate = LocalDateTime.now();
 
@@ -166,5 +169,13 @@ public class Item {
         }
         priceReduction.setItem(this);
         priceReductions.add(priceReduction);
+    }
+
+    public void addDeactivationReason(DeactivationReason deactivationReason) {
+        if(deactivationReasons == null) {
+            deactivationReasons = new ArrayList<>();
+        }
+        deactivationReason.setItem(this);
+        deactivationReasons.add(deactivationReason);
     }
 }
