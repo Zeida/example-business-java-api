@@ -10,6 +10,7 @@ import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.PriceReductionRepository;
 import com.example.business.api.service.PriceReductionServiceImpl;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,9 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PriceReductionServiceTest {
@@ -41,77 +40,90 @@ public class PriceReductionServiceTest {
     @Mock
     private ItemRepository itemRepository;
 
+    private static ItemDTO testItemDTO;
+    private static Item testItem;
+
+    private static PriceReductionDTO testPriceReductionDTO;
+    private static PriceReduction testPriceReduction;
+
+    private static final Long ID = 1L;
+    private static final Long CODE = 1L;
+
+    private static final Double PRICE = 12.5;
+    private static final String DESC = "Description";
+
+    private static final Double AMOUNT_DEDUCTED = 10.5;
+    private static final LocalDateTime END_DATE = LocalDateTime.now().plusMonths(6);
+
+    @BeforeClass
+    public static void setupTest() {
+        testItemDTO = new ItemDTO();
+        testItemDTO.setId(ID);
+        testItemDTO.setCode(CODE);
+        testItemDTO.setPrice(PRICE);
+        testItemDTO.setDescription(DESC);
+
+        testItem = new Item();
+        testItem.setId(ID);
+        testItem.setCode(CODE);
+        testItem.setPrice(PRICE);
+        testItem.setDescription(DESC);
+
+        List<PriceReduction> priceReductions = new ArrayList<>();
+        List<PriceReductionDTO> priceReductionDTOS = new ArrayList<>();
+
+        testPriceReductionDTO = new PriceReductionDTO();
+        testPriceReductionDTO.setId(ID);
+        testPriceReductionDTO.setCode(CODE);
+        testPriceReductionDTO.setAmountDeducted(AMOUNT_DEDUCTED);
+        testPriceReductionDTO.setEndDate(END_DATE);
+        testPriceReductionDTO.setItem(testItemDTO);
+
+        testPriceReduction = new PriceReduction();
+        testPriceReduction.setId(ID);
+        testPriceReduction.setCode(CODE);
+        testPriceReduction.setAmountDeducted(AMOUNT_DEDUCTED);
+        testPriceReduction.setEndDate(END_DATE);
+        testPriceReduction.setItem(testItem);
+
+        priceReductions.add(testPriceReduction);
+        priceReductionDTOS.add(testPriceReductionDTO);
+
+        testItem.setPriceReductions(priceReductions);
+        testItemDTO.setPriceReductions(priceReductionDTOS);
+    }
+
     @Test
     public void findAllPriceReductionsWithOnePriceReduction() {
         Set<PriceReduction> priceReductions = new HashSet<>();
         Set<PriceReductionDTO> priceReductionDTOS = new HashSet<>();
 
-        User user = new User();
-        user.setId(1L);
-
-        Item item = new Item();
-        item.setId(1L);
-
-        PriceReduction priceReduction = new PriceReduction(1L, 1L, 22.5,
-                LocalDateTime.now(),LocalDateTime.now().plusMonths(1), item);
-
-        priceReductions.add(priceReduction);
-
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-
-        ItemDTO itemDTO = new ItemDTO();
-        itemDTO.setId(item.getId());
-
-        PriceReductionDTO priceReductionDTO = new PriceReductionDTO();
-        priceReductionDTO.setId(priceReduction.getId());
-        priceReductionDTO.setCode(priceReduction.getCode());
-        priceReductionDTO.setStartDate(priceReduction.getStartDate());
-        priceReductionDTO.setEndDate(priceReduction.getEndDate());
-        priceReductionDTO.setAmountDeducted(priceReduction.getAmountDeducted());
-        priceReductionDTO.setItem(itemDTO);
-
-        priceReductionDTOS.add(priceReductionDTO);
+        priceReductions.add(testPriceReduction);
+        priceReductionDTOS.add(testPriceReductionDTO);
 
         Mockito.when(priceReductionRepository.findAll()).thenReturn(priceReductions);
         Mockito.doReturn(priceReductionDTOS).when(priceReductionService).convertIterable2DTO(priceReductions);
 
         Iterable<PriceReductionDTO> allPriceReductions = priceReductionService.getAllPriceReductions();
         PriceReductionDTO actualPriceReduction = allPriceReductions.iterator().next();
-        Assert.assertEquals(new Long(1L), actualPriceReduction.getId());
+        Assert.assertEquals(CODE, actualPriceReduction.getCode());
         Mockito.verify(priceReductionService, Mockito.times(1)).getAllPriceReductions();
     }
 
     @Test
     public void getPriceReductionByExistingCode() {
-        Long code = 1L;
-        PriceReduction priceReductionFromDB = new PriceReduction();
-        priceReductionFromDB.setId(1L);
-        priceReductionFromDB.setCode(1L);
+        Mockito.when(priceReductionRepository.findByCode(CODE)).thenReturn(Optional.of(testPriceReduction));
+        Mockito.doReturn(testPriceReductionDTO).when(priceReductionService).convert2DTO(testPriceReduction);
 
-        PriceReductionDTO priceReductionDTO = new PriceReductionDTO();
-        priceReductionDTO.setId(priceReductionFromDB.getId());
-        priceReductionDTO.setCode(priceReductionFromDB.getCode());
+        PriceReductionDTO actualPriceReduction = priceReductionService.getPriceReductionFromCode(CODE);
 
-        Mockito.when(priceReductionRepository.findByCode(code)).thenReturn(Optional.of(priceReductionFromDB));
-        Mockito.doReturn(priceReductionDTO).when(priceReductionService).convert2DTO(priceReductionFromDB);
-
-        PriceReductionDTO actualPriceReduction = priceReductionService.getPriceReductionFromCode(code);
-
-        Assert.assertEquals(code, actualPriceReduction.getCode());
-        Mockito.verify(priceReductionService, Mockito.times(1)).getPriceReductionFromCode(code);
+        Assert.assertEquals(CODE, actualPriceReduction.getCode());
+        Mockito.verify(priceReductionService, Mockito.times(1)).getPriceReductionFromCode(CODE);
     }
 
     @Test
     public void getPriceReductionByNoExistingCode() {
-        Long code = 1L;
-        PriceReduction priceReductionFromDB = new PriceReduction();
-        priceReductionFromDB.setId(1L);
-        priceReductionFromDB.setCode(1L);
-
-        PriceReductionDTO priceReductionDTO = new PriceReductionDTO();
-        priceReductionDTO.setId(priceReductionFromDB.getId());
-        priceReductionDTO.setCode(priceReductionFromDB.getCode());
+        Long code = 2L;
 
         Mockito.when(priceReductionRepository.findByCode(code)).thenReturn(Optional.empty());
 
@@ -129,102 +141,143 @@ public class PriceReductionServiceTest {
 
     @Test
     public void addNewPriceReduction() {
-        Long code = 1L;
+        testItemDTO.setPriceReductions(null);
+        testItem.setPriceReductions(null);
 
-        Item item = new Item();
-        ItemDTO itemDTO = new ItemDTO();
-        item.setCode(code);
-        itemDTO.setCode(code);
+        Mockito.when(priceReductionRepository.findByCode(CODE)).thenReturn(Optional.empty());
+        Mockito.when(itemRepository.findByCode(CODE)).thenReturn(Optional.of(testItem));
 
-        PriceReduction priceReduction = new PriceReduction();
-        priceReduction.setId(1L);
-        priceReduction.setCode(1L);
-        priceReduction.setAmountDeducted(1.0);
-        priceReduction.setItem(item);
-        priceReduction.setEndDate(LocalDateTime.now().plusMonths(5));
-
-        PriceReductionDTO priceReductionDTO = new PriceReductionDTO();
-        priceReductionDTO.setCode(priceReduction.getCode());
-        priceReductionDTO.setAmountDeducted(priceReduction.getAmountDeducted());
-        priceReductionDTO.setItem(itemDTO);
-        priceReductionDTO.setEndDate(priceReduction.getEndDate());
-
-        Mockito.when(priceReductionRepository.findByCode(code)).thenReturn(Optional.empty());
-        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(item));
-
-        priceReductionService.savePriceReduction(priceReductionDTO);
+        priceReductionService.savePriceReduction(testPriceReductionDTO);
 
         Mockito.verify(priceReductionService,
                 Mockito.times(1))
-                .savePriceReduction(priceReductionDTO);
+                .savePriceReduction(testPriceReductionDTO);
+
+        testItemDTO.addPriceReduction(testPriceReductionDTO);
+        testItem.addPriceReduction(testPriceReduction);
+    }
+
+    @Test
+    public void addNewPriceReductionWithMissingAmountDeducted() {
+        testPriceReductionDTO.setAmountDeducted(null);
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.priceReductionService.savePriceReduction(testPriceReductionDTO));
+
+        String expectedMessage = String.format("%s \"A price reduction must have the amount deducted > 0\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(priceReductionService,
+                Mockito.times(1))
+                .savePriceReduction(testPriceReductionDTO);
+
+        testPriceReductionDTO.setAmountDeducted(AMOUNT_DEDUCTED);
+    }
+
+    @Test
+    public void addNewPriceReductionWithMissingItem() {
+        testPriceReductionDTO.setItem(null);
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.priceReductionService.savePriceReduction(testPriceReductionDTO));
+
+        String expectedMessage = String.format("%s \"A price reduction must me applied to an item.\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(priceReductionService,
+                Mockito.times(1))
+                .savePriceReduction(testPriceReductionDTO);
+
+        testPriceReductionDTO.setItem(testItemDTO);
+    }
+
+    @Test
+    public void addNewPriceReductionWithMissingEndDate() {
+        testPriceReductionDTO.setEndDate(null);
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.priceReductionService.savePriceReduction(testPriceReductionDTO));
+
+        String expectedMessage = String.format("%s \"A price reduction must have an end date.\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(priceReductionService,
+                Mockito.times(1))
+                .savePriceReduction(testPriceReductionDTO);
+
+        testPriceReductionDTO.setEndDate(END_DATE);
+    }
+
+    @Test
+    public void addNewPriceReductionButStarDateIsAfterEndDate() {
+        testPriceReductionDTO.setStartDate(END_DATE.plusMonths(1));
+
+        Exception exception = Assert.assertThrows(ResponseStatusException.class,
+                () -> this.priceReductionService.savePriceReduction(testPriceReductionDTO));
+
+        String expectedMessage = String.format("%s \"End date should be a date after start date\"",
+                HttpStatus.BAD_REQUEST.toString());
+
+        String actualMessage = exception.getMessage();
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+
+        Mockito.verify(priceReductionService,
+                Mockito.times(1))
+                .savePriceReduction(testPriceReductionDTO);
+
+        testPriceReductionDTO.setStartDate(null);
     }
 
     @Test
     public void updateExistingPriceReduction() {
-        Long code = 1L;
+        testItemDTO.setPriceReductions(null);
+        testItem.setPriceReductions(null);
 
-        Item item = new Item();
-        ItemDTO itemDTO = new ItemDTO();
-        item.setCode(code);
-        itemDTO.setCode(code);
+        Mockito.when(priceReductionRepository.findByCode(CODE)).thenReturn(Optional.of(testPriceReduction));
+        Mockito.when(itemRepository.findByCode(CODE)).thenReturn(Optional.of(testItem));
 
-        PriceReduction priceReduction = new PriceReduction();
-        priceReduction.setId(1L);
-        priceReduction.setCode(1L);
-        priceReduction.setAmountDeducted(1.0);
-        priceReduction.setItem(item);
-        priceReduction.setEndDate(LocalDateTime.now().plusMonths(5));
-
-        PriceReductionDTO priceReductionDTO = new PriceReductionDTO();
-        priceReductionDTO.setCode(priceReduction.getCode());
-        priceReductionDTO.setAmountDeducted(priceReduction.getAmountDeducted());
-        priceReductionDTO.setItem(itemDTO);
-        priceReductionDTO.setEndDate(priceReduction.getEndDate());
-
-        Mockito.when(priceReductionRepository.findByCode(code)).thenReturn(Optional.of(priceReduction));
-        Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(item));
-
-        priceReductionService.updatePriceReductionWithCode(priceReductionDTO, code);
+        priceReductionService.updatePriceReductionWithCode(testPriceReductionDTO, CODE);
 
         Mockito.verify(priceReductionService, Mockito.times(1))
-                .updatePriceReductionWithCode(priceReductionDTO, code);
+                .updatePriceReductionWithCode(testPriceReductionDTO, CODE);
+
+        testItemDTO.addPriceReduction(testPriceReductionDTO);
+        testItem.addPriceReduction(testPriceReduction);
     }
 
     @Test
     public void updateNoExistingPriceReduction() {
-        Long code = 1L;
+        Long code = 2L;
+        testPriceReductionDTO.setCode(code);
 
-        Item item = new Item();
-        ItemDTO itemDTO = new ItemDTO();
-        item.setCode(code);
-        itemDTO.setCode(code);
-
-        PriceReduction priceReduction = new PriceReduction();
-        priceReduction.setId(1L);
-        priceReduction.setCode(1L);
-        priceReduction.setAmountDeducted(1.0);
-        priceReduction.setItem(item);
-        priceReduction.setEndDate(LocalDateTime.now().plusMonths(5));
-
-        PriceReductionDTO priceReductionDTO = new PriceReductionDTO();
-        priceReductionDTO.setCode(priceReduction.getCode());
-        priceReductionDTO.setAmountDeducted(priceReduction.getAmountDeducted());
-        priceReductionDTO.setItem(itemDTO);
-        priceReductionDTO.setEndDate(priceReduction.getEndDate());
-
-        Mockito.when(priceReductionRepository.findByCode(1L)).thenReturn(Optional.empty());
+        Mockito.when(priceReductionRepository.findByCode(code)).thenReturn(Optional.empty());
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
-                () -> this.priceReductionService.updatePriceReductionWithCode(priceReductionDTO, 1L));
+                () -> this.priceReductionService.updatePriceReductionWithCode(testPriceReductionDTO, code));
 
         String expectedMessage = String.format("%s \"The price reduction '%s' does not exist\"",
-                HttpStatus.NOT_FOUND.toString(), priceReductionDTO.getCode());
+                HttpStatus.NOT_FOUND.toString(), testPriceReductionDTO.getCode());
 
         String actualMessage = exception.getMessage();
 
         Assert.assertEquals(expectedMessage, actualMessage);
 
         Mockito.verify(priceReductionService, Mockito.times(1))
-                .updatePriceReductionWithCode(priceReductionDTO, 1L);
+                .updatePriceReductionWithCode(testPriceReductionDTO, code);
+
+        testPriceReductionDTO.setCode(CODE);
     }
 }

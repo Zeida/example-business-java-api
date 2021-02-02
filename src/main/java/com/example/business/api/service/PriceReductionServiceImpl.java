@@ -166,7 +166,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
     private void checkDateRangeCompatibility(List<PriceReduction> priceReductions, LocalDateTime startDate, LocalDateTime endDate) {
         if(priceReductions != null) {
             Stream<PriceReduction> stream = priceReductions.stream();
-            if (stream.anyMatch(pr -> areDatesInRange(pr.getStartDate(), pr.getEndDate(), startDate, endDate))) {
+            if(stream.anyMatch(pr -> areDatesInRange(pr.getStartDate(), pr.getEndDate(), startDate, endDate))) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
                         String.format("A price reduction already exists in the current date range %s - %s",
                                 startDate.toString(), endDate.toString()));
@@ -175,6 +175,9 @@ public class PriceReductionServiceImpl implements PriceReductionService {
     }
 
     private boolean areDatesInRange(LocalDateTime startDate, LocalDateTime endDate,LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+        if(startDate == null || endDate == null || rangeStart == null || rangeEnd == null)
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "An internal error occurred. Try again later. If the problem persists, contact an administrator.");
         return !(startDate.compareTo(rangeStart) < 0 && endDate.compareTo(rangeStart) < 0)
                 ||
                 (startDate.compareTo(rangeEnd) > 0 && endDate.compareTo(rangeEnd) > 0);
