@@ -130,7 +130,13 @@ public class ItemServiceImpl implements ItemService{
                     String.format("The item '%s' does not exist", code));
         }
 
-        if(existingItem.get().getState() == ItemStateEnum.DISCONTINUED)
+        Optional<User> updater = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
+
+        if(!updater.isPresent())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This action cannot be done with the current user");
+
+        if(existingItem.get().getState() == ItemStateEnum.DISCONTINUED && updater.get().getRole() != UserRoleEnum.ADMIN)
             throw  new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("The item '%s' has %s state, it cannot be modified.",
                             code, ItemStateEnum.DISCONTINUED.name()));
