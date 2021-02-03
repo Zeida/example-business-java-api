@@ -28,8 +28,12 @@ public class DeactivationReasonServiceImpl implements DeactivationReasonService{
     }
 
     public DeactivationReasonDTO convert2DTO(DeactivationReason entity) {
-        if(entity != null)
+        if(entity != null) {
+            if (entity.getItem().getCreator() != null)
+                entity.getItem().getCreator().setPassword(null);
+
             return modelMapper.map(entity, DeactivationReasonDTO.class);
+        }
         return null;
     }
 
@@ -42,7 +46,12 @@ public class DeactivationReasonServiceImpl implements DeactivationReasonService{
     public Iterable<DeactivationReasonDTO> convertIterable2DTO(Iterable<DeactivationReason> iterableEntities) {
         if(iterableEntities != null)
             return StreamSupport.stream(iterableEntities.spliterator(), false)
-                    .map(deactivationReason -> modelMapper.map(deactivationReason, DeactivationReasonDTO.class))
+                    .map(deactivationReason -> {
+                        if(deactivationReason.getItem().getCreator() != null) {
+                            deactivationReason.getItem().getCreator().setPassword(null);
+                        }
+                        return modelMapper.map(deactivationReason, DeactivationReasonDTO.class);
+                    })
                     .collect(Collectors.toList());
         return null;
     }

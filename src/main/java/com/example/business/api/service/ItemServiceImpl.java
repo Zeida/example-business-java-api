@@ -224,8 +224,11 @@ public class ItemServiceImpl implements ItemService{
     }
 
     public ItemDTO convert2DTO(Item entity) {
-        if(entity != null)
+        if(entity != null) {
+            if (entity.getCreator() != null)
+                entity.getCreator().setPassword(null);
             return modelMapper.map(entity, ItemDTO.class);
+        }
         return null;
     }
 
@@ -238,7 +241,12 @@ public class ItemServiceImpl implements ItemService{
     public Iterable<ItemDTO> convertIterable2DTO(Iterable<Item> iterableEntities) {
         if(iterableEntities != null)
             return StreamSupport.stream(iterableEntities.spliterator(), false)
-                    .map(item -> modelMapper.map(item, ItemDTO.class))
+                    .map(item -> {
+                        if(item.getCreator() != null) {
+                            item.getCreator().setPassword(null);
+                        }
+                        return modelMapper.map(item, ItemDTO.class);
+                    })
                     .collect(Collectors.toSet());
         return null;
     }

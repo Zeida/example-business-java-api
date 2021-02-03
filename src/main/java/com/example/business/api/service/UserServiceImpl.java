@@ -40,6 +40,7 @@ public class UserServiceImpl implements UserService {
         if(user != null) {
             if(BCrypt.checkpw(password, user.getPassword())) {
                 user.setToken(getJWTTokenByUser(user));
+                user.setPassword(null);
                 return user;
             }
         }
@@ -132,7 +133,10 @@ public class UserServiceImpl implements UserService {
     public Iterable<UserDTO> convertIterable2DTO(Iterable<User> iterableEntities) {
         if(iterableEntities != null)
             return StreamSupport.stream(iterableEntities.spliterator(), false)
-                    .map(item -> modelMapper.map(item, UserDTO.class))
+                    .map(item -> {
+                        item.setPassword(null);
+                        return modelMapper.map(item, UserDTO.class);
+                    })
                     .collect(Collectors.toSet());
         return null;
     }
