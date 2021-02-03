@@ -276,6 +276,8 @@ public class ItemServiceTest {
         Long code = 1L;
 
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
+        Mockito.when(userRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
 
         itemService.updateItemWithCode(testItemDTO, code);
 
@@ -312,6 +314,8 @@ public class ItemServiceTest {
         testItemDTO.setDescription("");
 
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
+        Mockito.when(userRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
                 () -> this.itemService.updateItemWithCode(testItemDTO, code));
@@ -335,6 +339,8 @@ public class ItemServiceTest {
         testItemDTO.setPrice(0.);
 
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(auth);
+        Mockito.when(userRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
                 () -> this.itemService.updateItemWithCode(testItemDTO, code));

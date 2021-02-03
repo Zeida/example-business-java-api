@@ -63,7 +63,13 @@ public class ItemServiceImpl implements ItemService{
         if(dto == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The item to save is missing.");
 
-        Optional<User> creator = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
+        String username = authenticationFacade.getAuthentication().getName();
+
+        if(username == null)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This action cannot be done with the current user");
+
+        Optional<User> creator = userRepository.findByUsername(username);
 
         if(!creator.isPresent())
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -130,7 +136,13 @@ public class ItemServiceImpl implements ItemService{
                     String.format("The item '%s' does not exist", code));
         }
 
-        Optional<User> updater = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
+        String username = authenticationFacade.getAuthentication().getName();
+
+        if(username == null)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This action cannot be done with the current user");
+
+        Optional<User> updater = userRepository.findByUsername(username);
 
         if(!updater.isPresent())
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,

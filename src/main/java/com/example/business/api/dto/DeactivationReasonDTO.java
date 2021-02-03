@@ -1,10 +1,13 @@
 package com.example.business.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 public class DeactivationReasonDTO {
     private Long id;
 
     private String deactivationReason;
 
+    @JsonBackReference
     private ItemDTO item;
 
     private UserDTO creator;

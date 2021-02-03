@@ -139,6 +139,14 @@ public class Item {
         this.priceReductions = priceReductions;
     }
 
+    public List<DeactivationReason> getDeactivationReasons() {
+        return deactivationReasons;
+    }
+
+    public void setDeactivationReasons(List<DeactivationReason> deactivationReasons) {
+        this.deactivationReasons = deactivationReasons;
+    }
+
     public LocalDateTime getCreationDate() {
         return creationDate;
     }

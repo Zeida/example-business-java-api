@@ -86,6 +86,14 @@ public class ItemDTO implements Serializable {
         this.priceReductions = priceReductions;
     }
 
+    public List<DeactivationReasonDTO> getDeactivationReasons() {
+        return deactivationReasons;
+    }
+
+    public void setDeactivationReasons(List<DeactivationReasonDTO> deactivationReasons) {
+        this.deactivationReasons = deactivationReasons;
+    }
+
     public LocalDateTime getCreationDate() {
         return creationDate;
     }
