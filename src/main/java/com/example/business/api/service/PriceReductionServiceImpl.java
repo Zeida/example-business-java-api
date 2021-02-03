@@ -37,6 +37,9 @@ public class PriceReductionServiceImpl implements PriceReductionService {
 
     @Transactional
     public Void savePriceReduction(PriceReductionDTO dto) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price reduction to save is missing.");
+
         if(dto.getAmountDeducted() == null || dto.getAmountDeducted() <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "A price reduction must have the amount deducted > 0");
@@ -89,10 +92,15 @@ public class PriceReductionServiceImpl implements PriceReductionService {
     }
 
     public Void updatePriceReductionWithCode(PriceReductionDTO dto, Long code) {
-        if(!dto.getCode().equals(code)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    String.format("Expected to update the price reduction '%s'," +
-                            " price reduction '%s' given.", code, dto.getCode()));
+        if(code == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty code has been provided.");
+
+        if(dto.getCode() != null) {
+            if (!dto.getCode().equals(code)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        String.format("Expected to update the price reduction '%s'," +
+                                " price reduction '%s' given.", code, dto.getCode()));
+            }
         }
 
         if(dto.getAmountDeducted() != null && dto.getAmountDeducted() <= 0)

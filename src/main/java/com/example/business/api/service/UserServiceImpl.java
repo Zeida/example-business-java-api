@@ -32,6 +32,9 @@ public class UserServiceImpl implements UserService {
     private ItemRepository itemRepository;
 
     public UserDTO login(String username, String password) {
+        if(username == null || password == null || username.isEmpty() || password.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The username and password must be non-empty");
+
         UserDTO user = userRepository.findByUsername(username).map(this::convert2DTO).orElse(null);
 
         if(user != null) {
@@ -49,6 +52,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public Void saveUser(UserDTO dto) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user to save is missing.");
+
         if(userRepository.findByUsername(dto.getUsername()).isPresent())
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Invalid username, '%s' already exists", dto.getUsername()));
@@ -75,6 +81,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public Void removeUser(UserDTO dto) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user to delete is missing.");
+
         Optional<User> user = userRepository.findByUsername(dto.getUsername());
         if(!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");

@@ -60,6 +60,9 @@ public class ItemServiceImpl implements ItemService{
 
     @Transactional
     public Void saveItem(ItemDTO dto) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The item to save is missing.");
+
         Optional<User> creator = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
 
         if(!creator.isPresent())
@@ -107,9 +110,17 @@ public class ItemServiceImpl implements ItemService{
 
     @Transactional
     public Void updateItemWithCode(ItemDTO dto, Long code) {
-        if(!dto.getCode().equals(code)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    String.format("Expected to update the item '%s', item '%s' given.", code, dto.getCode()));
+        if(code == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty code has been provided.");
+
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The item with the updates is missing.");
+
+        if(dto.getCode() != null) {
+            if (!dto.getCode().equals(code)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        String.format("Expected to update the item '%s', item '%s' given.", code, dto.getCode()));
+            }
         }
 
         Optional<Item> existingItem = itemRepository.findByCode(code);

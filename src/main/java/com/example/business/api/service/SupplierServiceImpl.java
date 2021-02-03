@@ -49,6 +49,9 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Transactional
     public Void saveSupplier(SupplierDTO dto) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The supplier to save is missing.");
+
         if(dto.getName() == null || dto.getName().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A supplier must have a non-empty name");
 
@@ -79,13 +82,18 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Transactional
     public Void updateSupplierWithName(SupplierDTO dto, String name) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The supplier with the updates is missing.");
+
         if(name == null || name.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty name has been provided.");
 
-        if (!name.equals(dto.getName()))
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    String.format("Expected to update the supplier '%s'," +
-                            " supplier '%s' given.", name, dto.getName()));
+        if(dto.getName() != null) {
+            if (!name.equals(dto.getName()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        String.format("Expected to update the supplier '%s'," +
+                                " supplier '%s' given.", name, dto.getName()));
+        }
 
         Optional<Supplier> currentSupplier = supplierRepository.findByName(name);
         if (!currentSupplier.isPresent()) {

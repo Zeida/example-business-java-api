@@ -1,11 +1,8 @@
 package com.example.business.api.service;
 
 import com.example.business.api.dto.DeactivationReasonDTO;
-import com.example.business.api.dto.ItemDTO;
-import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.DeactivationReason;
-import com.example.business.api.model.Item;
-import com.example.business.api.model.User;
+import com.example.business.api.repository.DeactivationReasonRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +14,14 @@ import java.util.stream.StreamSupport;
 public class DeactivationReasonServiceImpl implements DeactivationReasonService{
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private DeactivationReasonRepository deactivationReasonRepository;
+
+    public Iterable<DeactivationReasonDTO> findAllDeactivationReasons() {
+        Iterable<DeactivationReason> deactivationReasons = deactivationReasonRepository.findAll();
+        return convertIterable2DTO(deactivationReasons);
+    }
 
     public void mergeDTO2Entity(DeactivationReasonDTO dto, DeactivationReason entity, String mappingName) {
 
