@@ -192,6 +192,14 @@ public class ItemServiceImpl implements ItemService{
     }
 
     public Void deactivateItem(DeactivationReasonDTO dto, Long code) {
+        if(dto == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The deactivation reason is missing");
+
+        if(dto.getDeactivationReason() == null || dto.getDeactivationReason().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A deactivation must have a non-empty reason");
+
         Optional<User> creator = userRepository.findByUsername(authenticationFacade.getAuthentication().getName());
 
         if(!creator.isPresent())
