@@ -95,6 +95,9 @@ public class PriceReductionServiceImpl implements PriceReductionService {
         if(code == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty code has been provided.");
 
+        if(dto == null)
+            throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "The item with the updates is missing");
+
         if(dto.getCode() != null) {
             if (!dto.getCode().equals(code)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
