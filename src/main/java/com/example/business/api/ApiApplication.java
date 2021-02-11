@@ -22,8 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.Objects;
+import org.springframework.web.cors.CorsConfiguration;
 
 @SpringBootApplication
 @EnableAsync
@@ -93,6 +92,7 @@ public class ApiApplication {
 					.antMatchers("/h2-console/**").permitAll()
 					.anyRequest().authenticated();
 			http.headers().frameOptions().disable();
+			http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
 		}
 	}
 }
