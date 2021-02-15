@@ -363,9 +363,9 @@ public class ItemServiceTest {
 
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.of(testItem));
 
-        itemService.deleteItem(testItemDTO);
+        itemService.deleteItem(testItemDTO.getCode());
 
-        Mockito.verify(itemService, Mockito.times(1)).deleteItem(testItemDTO);
+        Mockito.verify(itemService, Mockito.times(1)).deleteItem(testItemDTO.getCode());
     }
 
     @Test
@@ -377,7 +377,7 @@ public class ItemServiceTest {
         Mockito.when(itemRepository.findByCode(code)).thenReturn(Optional.empty());
 
         Exception exception = Assert.assertThrows(ResponseStatusException.class,
-                () -> this.itemService.deleteItem(testItemDTO));
+                () -> this.itemService.deleteItem(testItemDTO.getCode()));
 
         String expectedMessage = String.format("%s \"The item '%s' does not exist\"",
                 HttpStatus.NOT_FOUND.toString(), testItemDTO.getCode());
@@ -386,7 +386,7 @@ public class ItemServiceTest {
 
         Assert.assertEquals(expectedMessage, actualMessage);
 
-        Mockito.verify(itemService, Mockito.times(1)).deleteItem(testItemDTO);
+        Mockito.verify(itemService, Mockito.times(1)).deleteItem(testItemDTO.getCode());
 
         testItemDTO.setCode(CODE);
     }

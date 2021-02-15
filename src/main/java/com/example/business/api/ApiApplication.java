@@ -92,7 +92,13 @@ public class ApiApplication {
 					.antMatchers("/h2-console/**").permitAll()
 					.anyRequest().authenticated();
 			http.headers().frameOptions().disable();
-			http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+
+			CorsConfiguration corsConfig = new CorsConfiguration().applyPermitDefaultValues();
+			corsConfig.addAllowedMethod("DELETE");
+			corsConfig.addAllowedMethod("POST");
+			corsConfig.addAllowedMethod("PUT");
+			corsConfig.addAllowedMethod("OPTIONS");
+			http.cors().configurationSource(request -> corsConfig);
 		}
 	}
 }

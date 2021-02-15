@@ -9,7 +9,7 @@ public interface ItemService extends BaseService<Item, ItemDTO>{
     Void saveItem(ItemDTO dto);
     ItemDTO getItemByCode(Long code);
     Void updateItemWithCode(ItemDTO dto, Long code);
-    Void deleteItem(ItemDTO dto);
+    Void deleteItem(Long code);
     Iterable<ItemDTO> findCheapestItemPerSupplier();
     Void deactivateItem(DeactivationReasonDTO dto, Long code);
 }

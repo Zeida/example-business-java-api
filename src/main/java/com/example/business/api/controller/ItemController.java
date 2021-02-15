@@ -56,11 +56,11 @@ public class ItemController {
         return new WebAsyncTask<>(() -> itemService.deactivateItem(deactivationReason, code));
     }
 
-    @DeleteMapping(path = "/items")
+    @DeleteMapping(path = "/items/{code}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public WebAsyncTask<Void> deleteItem(@RequestBody ItemDTO item) {
-        return new WebAsyncTask<>(() -> itemService.deleteItem(item));
+    public WebAsyncTask<Void> deleteItem(@PathVariable Long code) {
+        return new WebAsyncTask<>(() -> itemService.deleteItem(code));
     }
 
 }

@@ -177,11 +177,11 @@ public class ItemServiceImpl implements ItemService{
         return null;
     }
 
-    public Void deleteItem(ItemDTO dto) {
-        Optional<Item> item = itemRepository.findByCode(dto.getCode());
+    public Void deleteItem(Long code) {
+        Optional<Item> item = itemRepository.findByCode(code);
         if(!item.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("The item '%s' does not exist", dto.getCode()));
+                    String.format("The item '%s' does not exist", code));
         }
         itemRepository.delete(item.get());
         return null;
