@@ -41,6 +41,8 @@ public class ApiApplication {
 		modelMapper.typeMap(ItemDTO.class, Item.class, "UpdateItemMapping").addMappings(mapper -> {
 			mapper.skip(Item::setPriceReductions);
 			mapper.skip(Item::setSuppliers);
+			mapper.skip(Item::setCreator);
+			mapper.skip(Item::setDeactivationReasons);
 		});
 
 		modelMapper.typeMap(ItemDTO.class, Item.class, "SaveItemMapping").addMappings(mapper -> {
