@@ -90,8 +90,8 @@ public class UserServiceTest {
     public void removeUser() {
         Mockito.when(userRepository.findByUsername(testUserDTO.getUsername())).thenReturn(Optional.of(testUser));
 
-        userService.removeUser(testUserDTO);
+        userService.removeUser(testUserDTO.getUsername());
 
-        Mockito.verify(userService, Mockito.times(1)).removeUser(testUserDTO);
+        Mockito.verify(userService, Mockito.times(1)).removeUser(testUserDTO.getUsername());
     }
 }

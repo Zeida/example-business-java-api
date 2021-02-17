@@ -7,5 +7,5 @@ public interface UserService extends BaseService<User, UserDTO> {
     UserDTO login(String username, String password);
     Iterable<UserDTO> findAllUsers();
     Void saveUser(UserDTO dto);
-    Void removeUser(UserDTO dto);
+    Void removeUser(String username);
 }

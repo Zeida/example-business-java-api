@@ -3,6 +3,7 @@ package com.example.business.api.service;
 import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.Item;
 import com.example.business.api.model.User;
+import com.example.business.api.model.UserRoleEnum;
 import com.example.business.api.repository.ItemRepository;
 import com.example.business.api.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
@@ -66,6 +67,9 @@ public class UserServiceImpl implements UserService {
         if(dto.getPassword().isEmpty() || dto.getPassword() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A password must be provided");
 
+        if(dto.getRole() == null)
+            dto.setRole(UserRoleEnum.USER);
+
         User user = convert2Entity(dto);
         if(user != null) {
             Set<Item> allItems = processItems(user);
@@ -81,11 +85,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public Void removeUser(UserDTO dto) {
-        if(dto == null)
+    public Void removeUser(String username) {
+        if(username == null || username.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user to delete is missing.");
 
-        Optional<User> user = userRepository.findByUsername(dto.getUsername());
+        Optional<User> user = userRepository.findByUsername(username);
         if(!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");
         }

@@ -32,10 +32,10 @@ public class UserController {
         return new WebAsyncTask<>(() -> userService.saveUser(user));
     }
 
-    @DeleteMapping(path = "/users")
+    @DeleteMapping(path = "/users/{username}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public WebAsyncTask<Void> removeUser(@RequestBody UserDTO user) {
-        return new WebAsyncTask<>(() -> userService.removeUser(user));
+    public WebAsyncTask<Void> removeUser(@PathVariable String username) {
+        return new WebAsyncTask<>(() -> userService.removeUser(username));
     }
 }
