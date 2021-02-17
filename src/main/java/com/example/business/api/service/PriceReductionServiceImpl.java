@@ -96,7 +96,7 @@ public class PriceReductionServiceImpl implements PriceReductionService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empty code has been provided.");
 
         if(dto == null)
-            throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "The item with the updates is missing");
+            throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price reduction with the updates is missing");
 
         if(dto.getCode() != null) {
             if (!dto.getCode().equals(code)) {
@@ -123,6 +123,10 @@ public class PriceReductionServiceImpl implements PriceReductionService {
         if(endDate.isBefore(startDate))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "End date should be a date after start date");
+
+        if(dto.getItem() == null || dto.getItem().getCode() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A price reduction must me applied to an item.");
 
         Optional<Item> item = itemRepository.findByCode(dto.getItem().getCode());
         if(item.isPresent()) {
