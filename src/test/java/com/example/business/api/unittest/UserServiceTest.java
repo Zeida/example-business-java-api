@@ -2,6 +2,7 @@ package com.example.business.api.unittest;
 
 import com.example.business.api.dto.UserDTO;
 import com.example.business.api.model.User;
+import com.example.business.api.model.UserRoleEnum;
 import com.example.business.api.repository.UserRepository;
 import com.example.business.api.service.UserServiceImpl;
 import org.junit.Assert;
@@ -89,6 +90,7 @@ public class UserServiceTest {
     @Test
     public void removeUser() {
         Mockito.when(userRepository.findByUsername(testUserDTO.getUsername())).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepository.countByRole(UserRoleEnum.ADMIN)).thenReturn(99);
 
         userService.removeUser(testUserDTO.getUsername());
 

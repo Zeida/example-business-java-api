@@ -93,6 +93,11 @@ public class UserServiceImpl implements UserService {
         if(!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user to remove does not exist.");
         }
+
+        if(userRepository.countByRole(UserRoleEnum.ADMIN) <= 1 && user.get().getRole() == UserRoleEnum.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "At least a single admin must exist in the system.");
+        }
+
         if(user.get().getItems() != null) {
             for(Item item : user.get().getItems()) {
                 item.setCreator(null);
